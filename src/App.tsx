@@ -11,7 +11,10 @@ function App() {
           className="w-full h-screen"
         />
         <div className="absolute w-full h-5/6 flex justify-around items-end flex-col pr-32 pt-32">
-          <h1 className="text-white text-5xl italic">
+          <h1
+            className="text-white text-5xl italic"
+            style={{ textShadow: "2px 2px black" }}
+          >
             Bem vindo(a) ao Jaé empresa.
           </h1>
           <div className="flex flex-col items-end">
