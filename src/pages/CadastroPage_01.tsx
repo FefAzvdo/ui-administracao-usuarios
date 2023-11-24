@@ -1,7 +1,8 @@
-import Subtitle from "../components/Subtitle";
-import Title from "../components/Title";
 import { useForm, SubmitHandler } from "react-hook-form";
 import MaskedInput from "react-input-mask";
+import { isCnpjValid } from "../utils";
+import { useNavigate } from "react-router-dom";
+import CadastroHeader from "../components/CadastroHeader";
 
 type Inputs = {
   nome: string;
@@ -9,7 +10,14 @@ type Inputs = {
   telefoneParaContato: string;
 };
 
-const inputStyle = "my-16 border-b-2  border-slate-400 p-3 text-xl";
+const inputStyle =
+  "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500";
+
+const labelStyle =
+  "block mb-2 text-sm font-medium text-gray-900 dark:text-white";
+
+const sumbitButtonStyle =
+  "cursor-pointer text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700";
 
 function CadsatroPage_01() {
   const {
@@ -19,70 +27,107 @@ function CadsatroPage_01() {
     watch,
   } = useForm<Inputs>();
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => console.log(data);
+  const navigate = useNavigate();
+
+  const onSubmit: SubmitHandler<Inputs> = (data) => {
+    console.log(data);
+    navigateToPage(data);
+  };
+
+  const navigateToPage = (inputData: Inputs) => {
+    const { cnpj, nome, telefoneParaContato } = inputData;
+
+    navigate("/cadastro-02", {
+      state: {
+        cnpj,
+        nome,
+        telefoneParaContato,
+      },
+    });
+  };
 
   return (
     <div className="flex flex-col h-screen">
-      <div className="bg-black w-full h-56 flex justify-center items-center flex-col">
-        <Title title="Abrir a conta empresa é muito simples" />
-        <Subtitle subtitle="Comece preenchendo os dados da sua empresa" />
-      </div>
+      <CadastroHeader
+        title="Abrir a conta empresa é muito simples"
+        subtitle="Comece preenchendo os dados da sua empresa"
+      />
       <div className="flex justify-center items-center h-full">
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col max-w-xl"
           style={{ minWidth: "50%" }}
         >
-          {/* register your input into the hook by invoking the "register" function */}
-
+          <div className="my-16">
+            <label htmlFor="nome" className={labelStyle}>
+              Nome da empresa
+            </label>
+            <input
+              id="nome"
+              {...register("nome", {
+                required: { value: true, message: "Campo requerido" },
+              })}
+              className={inputStyle}
+            />
+            {errors.nome && (
+              <span className="text-red-500 font-medium">
+                {errors.nome.message}
+              </span>
+            )}
+          </div>
+          <div className="my-16">
+            <label htmlFor="cnpj" className={labelStyle}>
+              CNPJ
+            </label>
+            <MaskedInput
+              id="cnpj"
+              mask={"99.999.999/9999-99"}
+              alwaysShowMask={false}
+              type={"text"}
+              {...register("cnpj", {
+                required: { value: true, message: "Campo obrigatório" },
+                validate: (cnpj) => isCnpjValid(cnpj),
+              })}
+              className={inputStyle}
+            />
+            {errors.cnpj && (
+              <span className="text-red-500 font-medium">
+                {errors.cnpj.message}
+              </span>
+            )}
+            {errors.cnpj?.type === "validate" && (
+              <span className="text-red-500 font-medium">Cnpj inválido</span>
+            )}
+          </div>
+          <div className="my-16">
+            <label htmlFor="telefone" className={labelStyle}>
+              Telefone para contato
+            </label>
+            <MaskedInput
+              id="telefone"
+              mask={
+                watch("telefoneParaContato", "")[5] === "9"
+                  ? "(99) 99999-9999"
+                  : "(99) 9999-9999"
+              }
+              alwaysShowMask={false}
+              type={"text"}
+              {...register("telefoneParaContato", {
+                required: { value: true, message: "Campo requerido" },
+              })}
+              className={inputStyle}
+            />
+            {errors.telefoneParaContato && (
+              <span className="text-red-500 font-medium">
+                {errors.telefoneParaContato.message}
+              </span>
+            )}
+          </div>
           <input
-            {...register("nome", { required: true })}
-            placeholder="Nome da sua empresa"
-            className={inputStyle}
+            type="submit"
+            value={"Continuar"}
+            className={sumbitButtonStyle}
           />
-
-          <MaskedInput
-            // mask options
-            mask={"99.999.999/9999-99"}
-            alwaysShowMask={false}
-            // input options
-            type={"text"}
-            placeholder="CNPJ"
-            // react hook form register
-            {...register("cnpj", { required: true })}
-            className={inputStyle}
-          />
-
-          <MaskedInput
-            // mask options
-            // mask={mask}
-            mask={
-              watch("telefoneParaContato", "").replace(/\D/g, "").length === 11
-                ? "(99) 9999-9999" //10
-                : "(99) 99999-9999" //11
-            }
-            alwaysShowMask={false}
-            // input options
-            type={"text"}
-            placeholder="Telefone para contato"
-            // react hook form register
-            {...register("telefoneParaContato", {
-              required: true,
-              onChange: (e) => {
-                const value = e.target.value.replace(/\D/g, "");
-                // console.log(value);
-                console.log(value.length);
-                // if (value.length === 10) {
-                //   setMask("(99) 99999-9999");
-                // } else {
-                //   setMask("(99) 9999-9999");
-                // }
-              },
-            })}
-            className={inputStyle}
-          />
-
-          <input type="submit" />
         </form>
       </div>
     </div>

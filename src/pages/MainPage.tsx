@@ -1,9 +1,10 @@
 import banner from "../assets/mulher-rh.jpg";
+import { Link } from "react-router-dom";
 
 function MainPage() {
   return (
     <div className="flex">
-      <div className="bg-black absolute top-0 left-0 w-full h-full bg-opacity-30" />
+      <div className="bg-black absolute top-0 left-0 w-full h-full bg-opacity-50" />
       <img
         src={banner}
         alt="Mulher que trabalha no RH de uma empresa"
@@ -18,15 +19,18 @@ function MainPage() {
         </h1>
         <div className="flex flex-col items-end">
           <p className="text-white">Primeira vez aqui ?</p>
-          <a href="" className="text-white font-black text-3xl underline">
+          <Link
+            to={"/cadastro-01"}
+            className="text-white font-black text-3xl underline"
+          >
             Abrir conta
-          </a>
+          </Link>
         </div>
         <div className="flex flex-col items-end">
           <p className="text-white">Já possui cadastro ?</p>
-          <a href="" className="text-white font-black  text-3xl underline">
+          <Link to={""} className="text-white font-black text-3xl underline">
             Entrar
-          </a>
+          </Link>
         </div>
       </div>
     </div>
