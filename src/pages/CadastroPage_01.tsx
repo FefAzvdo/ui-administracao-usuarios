@@ -55,8 +55,7 @@ function CadsatroPage_01() {
       <div className="flex justify-center items-center h-full">
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col max-w-xl"
-          style={{ minWidth: "50%" }}
+          className="flex flex-col max-w-xl w-11/12"
         >
           <div className="my-16">
             <label htmlFor="nome" className={labelStyle}>

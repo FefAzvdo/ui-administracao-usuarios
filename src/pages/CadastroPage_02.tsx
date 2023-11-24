@@ -43,6 +43,30 @@ function CadsatroPage_02() {
     confirmaSenha: false,
   });
 
+  const requisitosDeSenha = [
+    {
+      regra: watch("senha", "").length > 8,
+      menssagem: "Sua senha deve conter mais de 8 caracteres",
+    },
+    {
+      regra: hasLowerCase(watch("senha", "")),
+      menssagem: "Deve possuir pelo menos um caractere minúsculo",
+    },
+    {
+      regra: hasNumber(watch("senha", "")),
+      menssagem: "Deve possuir pelo menos um número",
+    },
+    {
+      regra: hasUpperCase(watch("senha", "")),
+      menssagem: "Deve possuir pelo menos um caractere maiúsculo",
+    },
+    {
+      regra: hasSpecialChar(watch("senha", "")),
+      menssagem:
+        "Deve possuir pelo menos um caractere especial. Exemplo: #, $, @",
+    },
+  ];
+
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     navigateToPage(data);
   };
@@ -100,8 +124,7 @@ function CadsatroPage_02() {
       <div className="flex justify-center items-center h-full">
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col max-w-xl"
-          style={{ minWidth: "50%" }}
+          className="flex flex-col max-w-xl w-11/12"
         >
           <div className="my-8">
             <label htmlFor="email" className={labelStyle}>
@@ -128,65 +151,17 @@ function CadsatroPage_02() {
 
           <div className="my-8">
             <ul className="mb-6">
-              <li
-                className={
-                  watch("senha", "").length > 8
-                    ? "text-green-500"
-                    : "text-red-500"
-                }
-              >
-                <span className="flex justify-start items-center">
-                  {<Pen className="mr-3" />} Sua senha deve conter mais de 8
-                  caracteres
-                </span>
-              </li>
-              <li
-                className={
-                  hasLowerCase(watch("senha", ""))
-                    ? "text-green-500"
-                    : "text-red-500"
-                }
-              >
-                <span className="flex justify-start items-center">
-                  {<Pen className="mr-3" />} Deve possuir pelo menos um
-                  caractere minúsculo
-                </span>
-              </li>
-              <li
-                className={
-                  hasNumber(watch("senha", ""))
-                    ? "text-green-500"
-                    : "text-red-500"
-                }
-              >
-                <span className="flex justify-start items-center">
-                  {<Pen className="mr-3" />} Deve possuir pelo menos um número
-                </span>
-              </li>
-              <li
-                className={
-                  hasUpperCase(watch("senha", ""))
-                    ? "text-green-500"
-                    : "text-red-500"
-                }
-              >
-                <span className="flex justify-start items-center">
-                  {<Pen className="mr-3" />} Deve possuir pelo menos um
-                  caractere maiúsculo
-                </span>
-              </li>
-              <li
-                className={
-                  hasSpecialChar(watch("senha", ""))
-                    ? "text-green-500"
-                    : "text-red-500"
-                }
-              >
-                <span className="flex justify-start items-center">
-                  {<Pen className="mr-3" />} Deve possuir pelo menos um
-                  caractere especial. Exemplo: #, $, @,
-                </span>
-              </li>
+              {requisitosDeSenha.map((requisito) => (
+                <li
+                  className={
+                    requisito.regra ? "text-green-500" : "text-red-500"
+                  }
+                >
+                  <span className="flex justify-start items-center">
+                    {<Pen className="mr-3" />} {requisito.menssagem}
+                  </span>
+                </li>
+              ))}
             </ul>
             <label
               htmlFor="senha"
