@@ -150,3 +150,60 @@ export function formatarCPF(cpf: string): string {
     9
   )}-${numeros.slice(9)}`;
 }
+
+export function isCpfValid(cpf: string): boolean {
+  if (typeof cpf !== "string") return false;
+  cpf = cpf.replace(/[\s.-]*/gim, "");
+  if (
+    !cpf ||
+    cpf.length != 11 ||
+    cpf == "00000000000" ||
+    cpf == "11111111111" ||
+    cpf == "22222222222" ||
+    cpf == "33333333333" ||
+    cpf == "44444444444" ||
+    cpf == "55555555555" ||
+    cpf == "66666666666" ||
+    cpf == "77777777777" ||
+    cpf == "88888888888" ||
+    cpf == "99999999999"
+  ) {
+    return false;
+  }
+  let soma = 0;
+  let resto;
+  for (let i = 1; i <= 9; i++)
+    soma = soma + parseInt(cpf.substring(i - 1, i)) * (11 - i);
+  resto = (soma * 10) % 11;
+  if (resto == 10 || resto == 11) resto = 0;
+  if (resto != parseInt(cpf.substring(9, 10))) return false;
+  soma = 0;
+  for (let i = 1; i <= 10; i++)
+    soma = soma + parseInt(cpf.substring(i - 1, i)) * (12 - i);
+  resto = (soma * 10) % 11;
+  if (resto == 10 || resto == 11) resto = 0;
+  if (resto != parseInt(cpf.substring(10, 11))) return false;
+  return true;
+}
+
+export function isCurrentDateAfterGivenDate(givenDate: string): boolean {
+  // Obtém a data atual
+  const currentDate = new Date();
+
+  // Divide a data fornecida em dia, mês e ano
+  const parts = givenDate.split("/");
+  const day = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1; // Os meses em JavaScript são indexados de 0 a 11
+  const year = parseInt(parts[2], 10);
+
+  // Converte a data fornecida para o objeto Date
+  const providedDate = new Date(year, month, day);
+
+  // Compara as datas
+  return currentDate > providedDate;
+}
+
+export function isDateDD_MM_YYYY_Valid(input: string): boolean {
+  const reg = /(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\d\d/;
+  return !!input?.match(reg) && isCurrentDateAfterGivenDate(input);
+}
