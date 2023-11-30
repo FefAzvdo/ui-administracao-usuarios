@@ -7,6 +7,7 @@ import "./index.css";
 import CadsatroPage_02 from "./pages/CadastroPage_02.tsx";
 import CadsatroPage_03 from "./pages/CadastroPage_03.tsx";
 import ColaboradoresPage from "./pages/ColaboradoresPage.tsx";
+import PedidosPage from "./pages/PedidosPage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
   {
     path: "/colaboradores",
     element: <ColaboradoresPage />,
+  },
+  {
+    path: "/pedidos",
+    element: <PedidosPage />,
   },
 ]);
 
