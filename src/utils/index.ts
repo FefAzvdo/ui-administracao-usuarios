@@ -220,3 +220,43 @@ export function isDateDD_MM_YYYY_Valid(input: string): boolean {
   const reg = /(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\d\d/;
   return !!input?.match(reg) && isCurrentDateAfterGivenDate(input);
 }
+
+export function formatDateFromYYYY_MM_DD_to_MMToDD_MM_YYYY(
+  data: string
+): string {
+  try {
+    // Usa split para dividir a data em partes (ano, mês, dia)
+    const partes = data.split("-");
+
+    // Se a data não tiver as três partes esperadas, retorna vazio
+    if (partes.length !== 3) {
+      throw new Error("Formato de data inválido");
+    }
+
+    // Reorganiza as partes para o formato desejado (dia, mês, ano)
+    const dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+
+    return dataFormatada;
+  } catch (error) {
+    console.error("Erro ao formatar data:", error);
+    return ""; // Retorna uma string vazia em caso de erro
+  }
+}
+
+export function setMaskNumeroCelular(numero: string): string {
+  // Remover caracteres não numéricos do número
+  const numeroLimpo = numero.replace(/\D/g, "");
+
+  // Verificar se o número tem 11 dígitos (incluindo o DDD)
+  if (numeroLimpo.length === 11) {
+    // Formatar o número de celular
+    const numeroFormatado = `(${numeroLimpo.substring(
+      0,
+      2
+    )}) ${numeroLimpo.substring(2, 7)}-${numeroLimpo.substring(7)}`;
+    return numeroFormatado;
+  } else {
+    // Caso o número não tenha 11 dígitos, retornar o número original
+    return numero;
+  }
+}

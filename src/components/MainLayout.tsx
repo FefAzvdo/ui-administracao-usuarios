@@ -80,7 +80,7 @@ export default function MainLayout({
         </Navbar>
       </div>
       <div className="flex justify-center py-2">
-        <div className="max-w-screen-xl w-full">
+        <div className="max-w-screen-xl w-full md:p-4">
           <h1 className="mb-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900 md:text-3xl lg:text-4xl dark:text-white">
             {pageTitle}
           </h1>
