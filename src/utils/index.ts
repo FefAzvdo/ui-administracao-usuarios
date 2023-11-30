@@ -118,12 +118,25 @@ export function onlyNumbers(text: string) {
   return text.replace(/\D/g, "");
 }
 
-export function formatarParaBRL(numero: number): string {
-  const numeroFormatado: string = numero.toFixed(2);
+export function formatarParaBRL(numero: number | string): string {
+  return numero.toLocaleString("pt-br", { style: "currency", currency: "BRL" });
+}
 
-  return `R$ ${numeroFormatado
-    .replace(".", ",")
-    .replace(/(\d)(?=(\d{3})+,)/g, "$1.")}`;
+export function formatarValorInputParaMoedaBRL(valor: string): string {
+  // Remove caracteres não numéricos
+  const valorNumerico = parseFloat(valor.replace(/[^\d]/g, ""));
+
+  // Converte para centavos
+  const valorCentavos = valorNumerico / 100;
+
+  // Formata como moeda brasileira
+  const formatoMoeda = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+
+  // Retorna o valor formatado
+  return formatoMoeda.format(valorCentavos);
 }
 
 export function formatarTelefone(telefone: string): string {
