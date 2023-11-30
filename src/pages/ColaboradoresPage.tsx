@@ -431,7 +431,10 @@ export default function ColaboradoresPage() {
             </Table.Head>
             <Table.Body className="divide-y">
               {mock.map((colaborador) => (
-                <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800 hover:bg-slate-100 font-semibold">
+                <Table.Row
+                  className="bg-white dark:border-gray-700 dark:bg-gray-800 hover:bg-slate-100 font-semibold"
+                  key={colaborador.numeroDocumento}
+                >
                   <Table.Cell>{colaborador.nome}</Table.Cell>
                   <Table.Cell>
                     {formatarCPF(colaborador.numeroDocumento)}

@@ -42,6 +42,7 @@ export default function MainLayout({
           <Navbar.Collapse>
             {menuItems.map((item) => (
               <Navbar.Link
+                key={item.path}
                 href={item.path}
                 active={item.path === location.pathname}
                 id="navbar-link"
