@@ -1,106 +1,18 @@
 import { useState, ChangeEvent } from "react";
 import MainLayout from "../components/MainLayout";
-import { Checkbox, Table, Radio, Label } from "flowbite-react";
+import { Checkbox, Table, Button } from "flowbite-react";
 import { mockColaboradores } from "./mock";
 import {
   formatCurrencyBrlToFloat,
   formatarCPF,
   formatarParaBRL,
-  formatarValorInputParaMoedaBRL,
 } from "../utils";
 import { ColaboratorType } from "../types";
+import { PlusCircle } from "@phosphor-icons/react";
+import { RadioButtonTipoPedido } from "../components/RadioButtonTipoPedido";
+import { CurrencyInput } from "../components/CurrencyInput";
 
-const inputStyle =
-  "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500";
-
-type RadioButtonTipoPedido = {
-  labelName: string;
-  labelHtmlFor: string;
-  labelColor: string;
-  radioId: string;
-  radioValue: string;
-  defaultChecked: boolean;
-  colaborador: ColaboratorType;
-  selectedColaboradores: ColaboratorType[];
-  onChange: (colabs: ColaboratorType[]) => void;
-};
-
-const RadioButtonTipoPedido = ({
-  labelName,
-  labelHtmlFor,
-  labelColor,
-  radioId,
-  radioValue,
-  defaultChecked,
-  colaborador,
-  selectedColaboradores,
-  onChange,
-}: RadioButtonTipoPedido) => {
-  return (
-    <div className="flex items-center gap-2">
-      <Radio
-        defaultChecked={defaultChecked}
-        name={colaborador.numeroDocumento}
-        id={colaborador.numeroDocumento + radioId}
-        value={radioValue}
-        onChange={(e) => {
-          const radioValue = e.target.value;
-
-          const newSelectedColabs = selectedColaboradores.map((colabs) => {
-            return {
-              ...colabs,
-              tipoDePedido:
-                colaborador.numeroDocumento === colabs.numeroDocumento
-                  ? radioValue
-                  : colabs.tipoDePedido,
-            };
-          });
-
-          onChange(newSelectedColabs);
-        }}
-      />
-      <Label
-        htmlFor={colaborador.numeroDocumento + labelHtmlFor}
-        className={labelColor}
-      >
-        {labelName}
-      </Label>
-    </div>
-  );
-};
-
-const CurrencyInput = ({
-  valorDeUsoDiario,
-  onChange,
-}: {
-  valorDeUsoDiario: string;
-  onChange: (valorMensal: string) => void;
-}) => {
-  const [valor, setValor] = useState(valorDeUsoDiario);
-
-  const handleChangeValorUsoDiario = (event: ChangeEvent<HTMLInputElement>) => {
-    const inputValue = event.target.value;
-    const valorFormatado = formatarValorInputParaMoedaBRL(inputValue);
-
-    setValor(valorFormatado);
-
-    onChange(valorFormatado);
-  };
-
-  return (
-    <div className="w-full">
-      <input
-        placeholder="R$ 0,00"
-        id="valorDeUsoDiario"
-        onChange={(e) => handleChangeValorUsoDiario(e)}
-        value={valor}
-        className={inputStyle}
-      />
-    </div>
-  );
-};
-
-export default function PedidosPage() {
+export default function PedidosPage_NovoPedido() {
   const [selectedColaboradores, setSelectedColaboradores] = useState<
     ColaboratorType[]
   >([]);
@@ -130,6 +42,11 @@ export default function PedidosPage() {
 
   return (
     <MainLayout pageTitle="Pedidos">
+      <div className="flex justify-end w-full mb-8">
+        <Button className="mt-2" onClick={() => {}}>
+          <PlusCircle size={20} className="mx-2" /> Novo pedido
+        </Button>
+      </div>
       <div className="flex items-center justify-end">
         <p className="text-lg">
           Quantidade de colaboradores:{" "}
@@ -171,8 +88,9 @@ export default function PedidosPage() {
                 className="bg-white dark:border-gray-700 dark:bg-gray-800 hover:bg-slate-100"
                 key={colaborador.numeroDocumento}
               >
-                <Table.Cell className="w-10 text-center">
+                <Table.Cell className="w-10 text-center ">
                   <Checkbox
+                    className="cursor-pointer"
                     onChange={(e) => handleChangeCheckbox(e, colaborador)}
                   />
                 </Table.Cell>
@@ -255,7 +173,20 @@ export default function PedidosPage() {
             ))}
           </Table.Body>
         </Table>
-        <button onClick={() => console.log(selectedColaboradores)}>ver</button>
+        <button
+          onClick={() => {
+            const isWithoutErrors =
+              selectedColaboradores.find(
+                (colab) =>
+                  Number.parseFloat(colab.valorDaRecarga.toString()) < 23 ||
+                  Number.parseFloat(colab.valorDaRecarga.toString()) > 3000
+              ) === undefined;
+
+            console.log("🚀 ~ isWithoutErrors:", isWithoutErrors);
+          }}
+        >
+          VERRR
+        </button>
       </div>
     </MainLayout>
   );
