@@ -21,6 +21,8 @@ export const mockColaboradores = [
     valorAlimentacao: 0,
     valorCombustivel: 0,
     numeroLogicoMidia: 0,
+    tipoDePedido: "",
+    valorDaRecarga: 0,
   },
   {
     idClientePrincipal: 636,
@@ -44,6 +46,8 @@ export const mockColaboradores = [
     valorAlimentacao: 0,
     valorCombustivel: 0,
     numeroLogicoMidia: 0,
+    tipoDePedido: "",
+    valorDaRecarga: 0,
   },
   {
     idClientePrincipal: 636,
@@ -67,6 +71,8 @@ export const mockColaboradores = [
     valorAlimentacao: 0,
     valorCombustivel: 0,
     numeroLogicoMidia: 0,
+    tipoDePedido: "",
+    valorDaRecarga: 0,
   },
   {
     idClientePrincipal: 636,
@@ -90,6 +96,8 @@ export const mockColaboradores = [
     valorAlimentacao: 0,
     valorCombustivel: 0,
     numeroLogicoMidia: 0,
+    tipoDePedido: "",
+    valorDaRecarga: 0,
   },
   {
     idClientePrincipal: 636,
@@ -113,6 +121,8 @@ export const mockColaboradores = [
     valorAlimentacao: 0,
     valorCombustivel: 0,
     numeroLogicoMidia: 0,
+    tipoDePedido: "",
+    valorDaRecarga: 0,
   },
   {
     idClientePrincipal: 636,
@@ -136,5 +146,7 @@ export const mockColaboradores = [
     valorAlimentacao: 0,
     valorCombustivel: 0,
     numeroLogicoMidia: 0,
+    tipoDePedido: "",
+    valorDaRecarga: 0,
   },
 ];

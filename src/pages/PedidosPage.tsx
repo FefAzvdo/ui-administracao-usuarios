@@ -1,39 +1,65 @@
 import { useState, ChangeEvent } from "react";
 import MainLayout from "../components/MainLayout";
-import { Checkbox, Table } from "flowbite-react";
+import { Checkbox, Table, Radio, Label } from "flowbite-react";
 import { mockColaboradores } from "./mock";
 import { formatarCPF } from "../utils";
 import { ColaboratorType } from "../types";
 
-// function Switch({ colaborador }: { colaborador: ColaboratorType }) {
-//   const podePedirPrimeiraVia = colaborador.solicitarPrimeiraVia;
+type RadioButtonTipoPedido = {
+  labelName: string;
+  labelHtmlFor: string;
+  labelColor: string;
+  radioId: string;
+  radioValue: string;
+  defaultChecked: boolean;
+  colaborador: ColaboratorType;
+  selectedColaboradores: ColaboratorType[];
+  onChange: (colabs: ColaboratorType[]) => void;
+};
 
-//   return (
-//     <label
-//       className={`relative mb-5 ${
-//         podePedirPrimeiraVia ? "cursor-pointer" : "cursor-not-allowed"
-//       }`}
-//       style={{ display: "-webkit-flex" }}
-//     >
-//       <input
-//         type="checkbox"
-//         className="sr-only peer"
-//         // checked={isChecked}
-//         disabled={!podePedirPrimeiraVia}
-//       />
-//       <div
-//         className={`w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:w-5 after:h-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600`}
-//       ></div>
-//       {podePedirPrimeiraVia ? (
-//         <span className="ms-3 text-sm font-medium text-gray-90">
-//           Recarca + cartão
-//         </span>
-//       ) : (
-//         <span className="ms-3 text-sm font-medium text-gray-300">Recarga</span>
-//       )}
-//     </label>
-//   );
-// }
+const RadioButtonTipoPedido = ({
+  labelName,
+  labelHtmlFor,
+  labelColor,
+  radioId,
+  radioValue,
+  defaultChecked,
+  colaborador,
+  selectedColaboradores,
+  onChange,
+}: RadioButtonTipoPedido) => {
+  return (
+    <div className="flex items-center gap-2">
+      <Radio
+        defaultChecked={defaultChecked}
+        name={colaborador.numeroDocumento}
+        id={colaborador.numeroDocumento + radioId}
+        value={radioValue}
+        onChange={(e) => {
+          const radioValue = e.target.value;
+
+          const newSelectedColabs = selectedColaboradores.map((colabs) => {
+            return {
+              ...colabs,
+              tipoDePedido:
+                colaborador.numeroDocumento === colabs.numeroDocumento
+                  ? radioValue
+                  : colabs.tipoDePedido,
+            };
+          });
+
+          onChange(newSelectedColabs);
+        }}
+      />
+      <Label
+        htmlFor={colaborador.numeroDocumento + labelHtmlFor}
+        className={labelColor}
+      >
+        {labelName}
+      </Label>
+    </div>
+  );
+};
 
 export default function PedidosPage() {
   const [selectedColaboradores, setSelectedColaboradores] = useState<
@@ -46,8 +72,14 @@ export default function PedidosPage() {
   ) {
     const isChecking = event.target.checked;
 
+    const editedColab = {
+      ...colaborador,
+      valorDaRecarga: 22 * colaborador.valorUsoDiario,
+      tipoDePedido: "recarga-na-conta",
+    };
+
     if (isChecking) {
-      setSelectedColaboradores([...selectedColaboradores, colaborador]);
+      setSelectedColaboradores([...selectedColaboradores, editedColab]);
     } else {
       const withoutColaboratorSelected = selectedColaboradores.filter(
         (colab) => colab.numeroDocumento !== colaborador.numeroDocumento
@@ -62,10 +94,15 @@ export default function PedidosPage() {
       <div className="overflow-x-auto">
         <Table hoverable>
           <Table.Head>
-            <Table.HeadCell>Selecionar colaborador</Table.HeadCell>
+            <Table.HeadCell className="text-center">
+              Selecionar colaborador
+            </Table.HeadCell>
             <Table.HeadCell>CPF</Table.HeadCell>
             <Table.HeadCell>Nome</Table.HeadCell>
-            <Table.HeadCell>Já possui cartão</Table.HeadCell>
+            <Table.HeadCell className="text-center">
+              Já possui cartão
+            </Table.HeadCell>
+            <Table.HeadCell>Tipo de pedido</Table.HeadCell>
             <Table.HeadCell>Tipo de Uso</Table.HeadCell>
           </Table.Head>
           <Table.Body className="divide-y">
@@ -83,11 +120,49 @@ export default function PedidosPage() {
                   {formatarCPF(colaborador.numeroDocumento)}
                 </Table.Cell>
                 <Table.Cell>{colaborador.nome}</Table.Cell>
-                <Table.Cell>
-                  {/* <Switch colaborador={colaborador} /> */}
+                <Table.Cell className="text-center w-10">
                   {colaborador.solicitarPrimeiraVia ? "Não" : "Sim"}
                 </Table.Cell>
-                <Table.Cell>$2999</Table.Cell>
+                <Table.Cell>
+                  {selectedColaboradores.find(
+                    (colab) =>
+                      colab.numeroDocumento === colaborador.numeroDocumento
+                  ) !== undefined ? (
+                    <div className="flex gap-4 flex-col">
+                      <RadioButtonTipoPedido
+                        defaultChecked
+                        colaborador={colaborador}
+                        labelName="Recarga na Conta Jaé VT"
+                        labelColor="text-green-500"
+                        labelHtmlFor="recarga-na-conta"
+                        radioId="recarga-na-conta"
+                        radioValue="recarga-na-conta"
+                        onChange={(colaboradores) =>
+                          setSelectedColaboradores(colaboradores)
+                        }
+                        selectedColaboradores={selectedColaboradores}
+                      />
+                      {colaborador.solicitarPrimeiraVia && (
+                        <RadioButtonTipoPedido
+                          defaultChecked={false}
+                          colaborador={colaborador}
+                          labelName="Recarga + Cartão"
+                          labelColor="text-blue-500"
+                          labelHtmlFor="cartao-com-recarga"
+                          radioId="cartao-com-recarga"
+                          radioValue="cartao-com-recarga"
+                          onChange={(colaboradores) =>
+                            setSelectedColaboradores(colaboradores)
+                          }
+                          selectedColaboradores={selectedColaboradores}
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    "---"
+                  )}
+                </Table.Cell>
+                <Table.Cell>aaa</Table.Cell>
               </Table.Row>
             ))}
           </Table.Body>

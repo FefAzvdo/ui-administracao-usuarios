@@ -20,4 +20,6 @@ export type ColaboratorType = {
   valorAlimentacao: number;
   valorCombustivel: number;
   numeroLogicoMidia: number;
+  tipoDePedido: string;
+  valorDaRecarga: number;
 };
