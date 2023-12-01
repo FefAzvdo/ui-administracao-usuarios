@@ -2,8 +2,16 @@ import { useState, ChangeEvent } from "react";
 import MainLayout from "../components/MainLayout";
 import { Checkbox, Table, Radio, Label } from "flowbite-react";
 import { mockColaboradores } from "./mock";
-import { formatarCPF } from "../utils";
+import {
+  formatCurrencyBrlToFloat,
+  formatarCPF,
+  formatarParaBRL,
+  formatarValorInputParaMoedaBRL,
+} from "../utils";
 import { ColaboratorType } from "../types";
+
+const inputStyle =
+  "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500";
 
 type RadioButtonTipoPedido = {
   labelName: string;
@@ -61,6 +69,37 @@ const RadioButtonTipoPedido = ({
   );
 };
 
+const CurrencyInput = ({
+  valorDeUsoDiario,
+  onChange,
+}: {
+  valorDeUsoDiario: string;
+  onChange: (valorMensal: string) => void;
+}) => {
+  const [valor, setValor] = useState(valorDeUsoDiario);
+
+  const handleChangeValorUsoDiario = (event: ChangeEvent<HTMLInputElement>) => {
+    const inputValue = event.target.value;
+    const valorFormatado = formatarValorInputParaMoedaBRL(inputValue);
+
+    setValor(valorFormatado);
+
+    onChange(valorFormatado);
+  };
+
+  return (
+    <div className="w-full">
+      <input
+        placeholder="R$ 0,00"
+        id="valorDeUsoDiario"
+        onChange={(e) => handleChangeValorUsoDiario(e)}
+        value={valor}
+        className={inputStyle}
+      />
+    </div>
+  );
+};
+
 export default function PedidosPage() {
   const [selectedColaboradores, setSelectedColaboradores] = useState<
     ColaboratorType[]
@@ -91,6 +130,27 @@ export default function PedidosPage() {
 
   return (
     <MainLayout pageTitle="Pedidos">
+      <div className="flex items-center justify-end">
+        <p className="text-lg">
+          Quantidade de colaboradores:{" "}
+          <span className="font-semibold">{selectedColaboradores.length}</span>
+        </p>
+      </div>
+      <div className="flex items-center justify-end">
+        <p className="text-lg">
+          Valor total do pedido:{" "}
+          <span className="font-semibold">
+            {formatarParaBRL(
+              selectedColaboradores.reduce(
+                (acumulador, item) =>
+                  Number.parseFloat(acumulador.toString()) +
+                  Number.parseFloat(item.valorDaRecarga.toString()),
+                0
+              )
+            )}
+          </span>
+        </p>
+      </div>
       <div className="overflow-x-auto">
         <Table hoverable>
           <Table.Head>
@@ -103,7 +163,7 @@ export default function PedidosPage() {
               Já possui cartão
             </Table.HeadCell>
             <Table.HeadCell>Tipo de pedido</Table.HeadCell>
-            <Table.HeadCell>Tipo de Uso</Table.HeadCell>
+            <Table.HeadCell>Valor de uso mensal (22 dias)</Table.HeadCell>
           </Table.Head>
           <Table.Body className="divide-y">
             {mockColaboradores.map((colaborador) => (
@@ -162,7 +222,35 @@ export default function PedidosPage() {
                     "---"
                   )}
                 </Table.Cell>
-                <Table.Cell>aaa</Table.Cell>
+                <Table.Cell>
+                  {selectedColaboradores.find(
+                    (colab) =>
+                      colab.numeroDocumento === colaborador.numeroDocumento
+                  ) !== undefined ? (
+                    <CurrencyInput
+                      valorDeUsoDiario={formatarParaBRL(
+                        colaborador.valorUsoDiario * 22
+                      )}
+                      onChange={(valorInput) => {
+                        const newSelectedColabs = selectedColaboradores.map(
+                          (colabs) => {
+                            return {
+                              ...colabs,
+                              valorDaRecarga:
+                                colaborador.numeroDocumento ===
+                                colabs.numeroDocumento
+                                  ? formatCurrencyBrlToFloat(valorInput)
+                                  : colabs.valorDaRecarga,
+                            };
+                          }
+                        );
+                        setSelectedColaboradores(newSelectedColabs);
+                      }}
+                    />
+                  ) : (
+                    "---"
+                  )}
+                </Table.Cell>
               </Table.Row>
             ))}
           </Table.Body>

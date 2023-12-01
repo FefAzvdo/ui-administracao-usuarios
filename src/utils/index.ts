@@ -260,3 +260,12 @@ export function setMaskNumeroCelular(numero: string): string {
     return numero;
   }
 }
+
+export function formatCurrencyBrlToFloat(numero: string): number {
+  //890.450.555,45
+
+  const reais = onlyNumbers(numero.split(",")[0]); //890450555
+  const centavos = numero.split(",")[1]; //45
+
+  return Number.parseFloat(reais + "." + centavos);
+}
