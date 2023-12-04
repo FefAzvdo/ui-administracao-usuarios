@@ -1,6 +1,6 @@
 import { useState, ChangeEvent } from "react";
 import MainLayout from "../components/MainLayout";
-import { Checkbox, Table, Button } from "flowbite-react";
+import { Checkbox, Table } from "flowbite-react";
 import { mockColaboradores } from "./mock";
 import {
   formatCurrencyBrlToFloat,
@@ -8,7 +8,6 @@ import {
   formatarParaBRL,
 } from "../utils";
 import { ColaboratorType } from "../types";
-import { PlusCircle } from "@phosphor-icons/react";
 import { RadioButtonTipoPedido } from "../components/RadioButtonTipoPedido";
 import { CurrencyInput } from "../components/CurrencyInput";
 
@@ -41,12 +40,7 @@ export default function PedidosPage_NovoPedido() {
   }
 
   return (
-    <MainLayout pageTitle="Pedidos">
-      <div className="flex justify-end w-full mb-8">
-        <Button className="mt-2" onClick={() => {}}>
-          <PlusCircle size={20} className="mx-2" /> Novo pedido
-        </Button>
-      </div>
+    <MainLayout pageTitle="Novo pedido">
       <div className="flex items-center justify-end">
         <p className="text-lg">
           Quantidade de colaboradores:{" "}

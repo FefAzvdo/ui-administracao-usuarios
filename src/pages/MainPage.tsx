@@ -28,7 +28,10 @@ function MainPage() {
         </div>
         <div className="flex flex-col items-end">
           <p className="text-white">Já possui cadastro ?</p>
-          <Link to={""} className="text-white font-black text-3xl underline">
+          <Link
+            to={"/colaboradores"}
+            className="text-white font-black text-3xl underline"
+          >
             Entrar
           </Link>
         </div>

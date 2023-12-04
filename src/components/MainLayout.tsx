@@ -7,7 +7,7 @@ import "./index.css";
 
 const menuItems = [
   { title: "Colaboradores", path: "/colaboradores" },
-  { title: "Pedidos", path: "/pedidos" },
+  { title: "Pedidos", path: "/ver-pedidos" },
   { title: "Importações", path: "/importacoes" },
 ];
 

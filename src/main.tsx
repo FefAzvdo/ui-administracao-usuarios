@@ -8,6 +8,7 @@ import CadsatroPage_02 from "./pages/CadastroPage_02.tsx";
 import CadsatroPage_03 from "./pages/CadastroPage_03.tsx";
 import ColaboradoresPage from "./pages/ColaboradoresPage.tsx";
 import PedidosPage_NovoPedido from "./pages/PedidosPage_NovoPedido.tsx";
+import PedidosPage_VerPedidos from "./pages/PedidosPage_VerPedidos.tsx";
 
 const router = createBrowserRouter([
   {
@@ -31,7 +32,11 @@ const router = createBrowserRouter([
     element: <ColaboradoresPage />,
   },
   {
-    path: "/pedidos",
+    path: "/ver-pedidos",
+    element: <PedidosPage_VerPedidos />,
+  },
+  {
+    path: "/novo-pedido",
     element: <PedidosPage_NovoPedido />,
   },
 ]);

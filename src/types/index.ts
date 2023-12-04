@@ -23,3 +23,44 @@ export type ColaboratorType = {
   tipoDePedido: string;
   valorDaRecarga: number | string;
 };
+
+export type PedidoType = {
+  numero: number;
+  idCliente: number;
+  nomeCliente: string;
+  documentoCliente: string;
+  quantidadeItens: number;
+  valorCalculadoPedido: number;
+  statusPedido: string;
+  valorPago: number;
+  dataPagamento?: string;
+  dataInclusao: string;
+  itensPedido: ItensPedido[];
+  pagamentosPedido: PagamentosPedido[];
+  nrSeqEndereco: number;
+  podeExcluir: boolean;
+  dataCancelamento?: string;
+};
+export type PagamentosPedido = {
+  valorPago: number;
+  dataPagamento?: string;
+  formaPagamento: string;
+  identificador?: number;
+  dataBaixa?: string;
+  tipoBaixa?: string;
+  usuario?: number;
+};
+export type ItensPedido = {
+  numeroItem: number;
+  idCliente: number;
+  usuario: string;
+  cartao?: string;
+  valor: number;
+  idServico: number;
+  servico: string;
+  idTipoItemPedido: number;
+  idTipoBeeValePedido?: number;
+  documento: string;
+  valorUsoDiario: number;
+  idProduto: number;
+};

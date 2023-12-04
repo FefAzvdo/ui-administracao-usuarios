@@ -225,12 +225,16 @@ export function formatDateFromYYYY_MM_DD_to_MMToDD_MM_YYYY(
   data: string
 ): string {
   try {
+    // Usa split para separar o tempo
+    const firstPart = data.split("T")[0];
+
     // Usa split para dividir a data em partes (ano, mês, dia)
-    const partes = data.split("-");
+    const partes = firstPart.split("-");
 
     // Se a data não tiver as três partes esperadas, retorna vazio
     if (partes.length !== 3) {
-      throw new Error("Formato de data inválido");
+      // throw new Error("Formato de data inválido");
+      return "";
     }
 
     // Reorganiza as partes para o formato desejado (dia, mês, ano)
