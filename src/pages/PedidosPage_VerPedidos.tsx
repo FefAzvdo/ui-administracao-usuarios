@@ -199,6 +199,7 @@ export default function PedidosPage_VerPedido() {
                     className="font-medium text-blue-600 dark:text-blue-500 hover:underline cursor-pointer"
                     onClick={() => {
                       setIsModalOpened(true);
+                      //@ts-expect-error mock
                       setPedidoSelecionado(pedido);
                     }}
                   >
