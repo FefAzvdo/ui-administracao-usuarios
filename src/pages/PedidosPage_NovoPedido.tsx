@@ -10,35 +10,11 @@ import {
 import { ColaboratorType } from "../types";
 import { RadioButtonTipoPedido } from "../components/RadioButtonTipoPedido";
 import { CurrencyInput } from "../components/CurrencyInput";
-import { Info } from "@phosphor-icons/react";
-import { useLocation } from "react-router-dom";
-
-const Timeline = ({ currentPath }: { currentPath: string }) => {
-  return (
-    <ul className="flex justify-start mb-8">
-      <li className="flex flex-col items-center font-bold">
-        <Info size={32} />
-        Escolher itens
-      </li>
-      <li className="hidden md:block">-----</li>
-      <li className="flex flex-col items-center">
-        <Info size={32} />
-        Escolher endereço
-      </li>
-      <li className="hidden md:block">-----</li>
-      <li className="flex flex-col items-center">
-        <Info size={32} />
-        Pedido finalizado
-      </li>
-    </ul>
-  );
-};
 
 export default function PedidosPage_NovoPedido() {
   const [selectedColaboradores, setSelectedColaboradores] = useState<
     ColaboratorType[]
   >([]);
-  const location = useLocation();
 
   function handleChangeCheckbox(
     event: ChangeEvent<HTMLInputElement>,
@@ -65,7 +41,6 @@ export default function PedidosPage_NovoPedido() {
 
   return (
     <MainLayout pageTitle="Novo pedido">
-      <Timeline currentPath={location.pathname} />
       <div className="flex items-center justify-end">
         <p className="text-lg">
           Quantidade de colaboradores:{" "}
