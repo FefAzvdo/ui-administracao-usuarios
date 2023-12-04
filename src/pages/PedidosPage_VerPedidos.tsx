@@ -70,7 +70,9 @@ export default function PedidosPage_VerPedido() {
                 }
               >
                 {mockStatusPedido.map((status) => (
-                  <option value={status.value}>{status.label}</option>
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
                 ))}
               </select>
             </div>
