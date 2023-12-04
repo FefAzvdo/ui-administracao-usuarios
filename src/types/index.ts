@@ -41,7 +41,7 @@ export type PedidoType = {
   podeExcluir: boolean;
   dataCancelamento?: string;
 };
-export type PagamentosPedido = {
+type PagamentosPedido = {
   valorPago: number;
   dataPagamento?: string;
   formaPagamento: string;
@@ -50,7 +50,7 @@ export type PagamentosPedido = {
   tipoBaixa?: string;
   usuario?: number;
 };
-export type ItensPedido = {
+type ItensPedido = {
   numeroItem: number;
   idCliente: number;
   usuario: string;
@@ -63,4 +63,69 @@ export type ItensPedido = {
   documento: string;
   valorUsoDiario: number;
   idProduto: number;
+};
+
+export type LojaType = {
+  codigo: number;
+  nome: string;
+  numeroDocumento: string;
+  idContaAcesso: number;
+  tipoDocumento: TipoDocumento;
+  tipoPessoa: string;
+  email: string;
+  telefone: string;
+  dataCadastro: string;
+  enderecos: EnderecoType[];
+  tiposDePerfis: string[];
+  nomeMae: string;
+  nomePai: string;
+  sexo: string;
+  jsonIntegracao: string;
+  numeroCartaoOperador: string;
+};
+
+type TipoDocumento = {
+  codigo: number;
+  descricao: string;
+};
+
+export type UsuarioType = {
+  jti: string;
+  sub: string;
+  nome: string;
+  perfis: string[];
+  email: string;
+  iat: number;
+  iss: string;
+  exp: number;
+  idCliente: number;
+  codigo: number;
+  enderecos: EnderecoType[];
+  numeroDocumento: string;
+  telefone: string;
+  tipoDocumento: TipoDocumento;
+  senha: string;
+  confirmacaoSenha: string;
+  servicoRequisicao: boolean;
+  idTipoPerfilCliente: number;
+  autorizadoRequisicao: boolean;
+  tipoGeracaoFatura: string;
+  tipoPagamento: string;
+};
+
+export type EnderecoType = {
+  nrSeqEndereco: number;
+  logradouro: string;
+  complemento: string;
+  bairro: string;
+  cidade: string;
+  uf: string;
+  cep: string;
+  numero: string;
+  dataCadastro: string;
+  dataInativacao: string;
+  latitude: string;
+  longitude: string;
+  tipoEndereco: string;
+  tipoLogradouro: string;
 };

@@ -1,6 +1,6 @@
 import { useState, ChangeEvent } from "react";
 import MainLayout from "../components/MainLayout";
-import { Checkbox, Table } from "flowbite-react";
+import { Button, Checkbox, Table } from "flowbite-react";
 import { mockColaboradores } from "./mock";
 import {
   formatCurrencyBrlToFloat,
@@ -10,12 +10,13 @@ import {
 import { ColaboratorType } from "../types";
 import { RadioButtonTipoPedido } from "../components/RadioButtonTipoPedido";
 import { CurrencyInput } from "../components/CurrencyInput";
+import { useNavigate } from "react-router-dom";
 
 export default function PedidosPage_NovoPedido() {
   const [selectedColaboradores, setSelectedColaboradores] = useState<
     ColaboratorType[]
   >([]);
-
+  const navigate = useNavigate();
   function handleChangeCheckbox(
     event: ChangeEvent<HTMLInputElement>,
     colaborador: ColaboratorType
@@ -39,15 +40,32 @@ export default function PedidosPage_NovoPedido() {
     }
   }
 
+  function handleClickNextStep() {
+    if (isWithoutErrors) {
+      navigate("/novo-pedido/entrega", {
+        state: {
+          selectedColaboradores,
+        },
+      });
+    }
+  }
+
+  const isWithoutErrors =
+    selectedColaboradores.find(
+      (colab) =>
+        Number.parseFloat(colab.valorDaRecarga.toString()) < 23 ||
+        Number.parseFloat(colab.valorDaRecarga.toString()) > 3000
+    ) === undefined;
+
   return (
     <MainLayout pageTitle="Novo pedido">
-      <div className="flex items-center justify-end">
+      <div className="flex items-center">
         <p className="text-lg">
           Quantidade de colaboradores:{" "}
           <span className="font-semibold">{selectedColaboradores.length}</span>
         </p>
       </div>
-      <div className="flex items-center justify-end">
+      <div className="flex items-center">
         <p className="text-lg">
           Valor total do pedido:{" "}
           <span className="font-semibold">
@@ -61,6 +79,14 @@ export default function PedidosPage_NovoPedido() {
             )}
           </span>
         </p>
+      </div>
+      <div className="flex justify-end mb-8">
+        <Button
+          onClick={handleClickNextStep}
+          disabled={selectedColaboradores.length === 0 || !isWithoutErrors}
+        >
+          Próximo
+        </Button>
       </div>
       <div className="overflow-x-auto">
         <Table hoverable>
@@ -167,20 +193,6 @@ export default function PedidosPage_NovoPedido() {
             ))}
           </Table.Body>
         </Table>
-        <button
-          onClick={() => {
-            const isWithoutErrors =
-              selectedColaboradores.find(
-                (colab) =>
-                  Number.parseFloat(colab.valorDaRecarga.toString()) < 23 ||
-                  Number.parseFloat(colab.valorDaRecarga.toString()) > 3000
-              ) === undefined;
-
-            console.log("🚀 ~ isWithoutErrors:", isWithoutErrors);
-          }}
-        >
-          VERRR
-        </button>
       </div>
     </MainLayout>
   );
