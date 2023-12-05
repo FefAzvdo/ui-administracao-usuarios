@@ -1,4 +1,4 @@
-import { useState, ChangeEvent } from "react";
+import { useState, ChangeEvent, useEffect } from "react";
 import MainLayout from "../components/MainLayout";
 import { Button, Checkbox, Table } from "flowbite-react";
 import { mockColaboradores } from "./mock";
@@ -10,13 +10,20 @@ import {
 import { ColaboratorType } from "../types";
 import { RadioButtonTipoPedido } from "../components/RadioButtonTipoPedido";
 import { CurrencyInput } from "../components/CurrencyInput";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function PedidosPage_NovoPedido() {
   const [selectedColaboradores, setSelectedColaboradores] = useState<
     ColaboratorType[]
   >([]);
   const navigate = useNavigate();
+  const params = useLocation();
+
+  useEffect(() => {
+    console.log(params.state.pedidoSelecionado);
+    setSelectedColaboradores(params.state.pedidoSelecionado.itensPedido);
+  }, []);
+
   function handleChangeCheckbox(
     event: ChangeEvent<HTMLInputElement>,
     colaborador: ColaboratorType

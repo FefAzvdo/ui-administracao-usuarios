@@ -8,14 +8,17 @@ import {
   MagnifyingGlass,
   Pencil,
   PlusCircle,
+  Receipt,
   Trash,
   Wrench,
+  Article,
 } from "@phosphor-icons/react";
 
 import { useNavigate } from "react-router-dom";
 import {
   formatDateFromYYYY_MM_DD_to_MMToDD_MM_YYYY,
   formatarParaBRL,
+  getCurrentStatusPedido,
 } from "../utils";
 import { useState } from "react";
 import { PedidoType } from "../types";
@@ -31,6 +34,15 @@ export default function PedidosPage_VerPedido() {
     periodoDe: new Date(),
     periodoAte: new Date(),
   });
+
+  function handleClickEditarPedido(pedidoSelecionado: PedidoType) {
+    navigate("/novo-pedido", {
+      state: {
+        pedidoSelecionado,
+      },
+    });
+  }
+
   return (
     <MainLayout pageTitle="Ver pedidos">
       <div className="flex justify-between md:items-center py-4 flex-col md:flex-row">
@@ -129,7 +141,7 @@ export default function PedidosPage_VerPedido() {
         onClose={() => setIsModalOpened(false)}
         size="4xl"
       >
-        <Modal.Header>Ações</Modal.Header>
+        <Modal.Header>{"Nº Pedido: " + pedidoSelecionado?.numero}</Modal.Header>
         <Modal.Body>
           <div className="text-center">
             <Wrench
@@ -137,29 +149,45 @@ export default function PedidosPage_VerPedido() {
               className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200"
             />
             <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-              Escolha o que deseja fazer com o pedido{" "}
+              Escolha o que deseja fazer com o pedido
             </h3>
             <div className="flex flex-col justify-center gap-4 md:flex-row">
-              <Button
-                className="mt-2"
-                onClick={() => {
-                  console.log("pedidoSelecionado =>", pedidoSelecionado);
-                }}
-              >
-                <Pencil size={20} className="mx-2" /> Editar
-              </Button>
+              {pedidoSelecionado?.statusPedido === "EM_PREPARO" && (
+                <Button
+                  className="mt-2"
+                  onClick={() => {
+                    handleClickEditarPedido(pedidoSelecionado);
+                  }}
+                >
+                  <Pencil size={20} className="mx-2" /> Editar
+                </Button>
+              )}
               <Button className="mt-2" onClick={() => {}}>
                 <Eye size={20} className="mx-2" /> Visualizar
               </Button>
               <Button className="mt-2" onClick={() => {}}>
                 <CopySimple size={20} className="mx-2" /> Duplicar
               </Button>
-              <Button className="mt-2" onClick={() => {}}>
-                <Check size={20} className="mx-2" /> Finalizar
-              </Button>
-              <Button className="mt-2" onClick={() => {}} color="failure">
-                <Trash size={20} className="mx-2" /> Excluir pedido
-              </Button>
+              {pedidoSelecionado?.statusPedido === "EM_PREPARO" && (
+                <Button className="mt-2" onClick={() => {}}>
+                  <Check size={20} className="mx-2" /> Finalizar
+                </Button>
+              )}
+              {pedidoSelecionado?.statusPedido === "AGUARDANDO_PAGAMENTO" && (
+                <Button className="mt-2" onClick={() => {}}>
+                  <Receipt size={20} className="mx-2" /> Boleto
+                </Button>
+              )}
+              {pedidoSelecionado?.statusPedido === "PAGO" && (
+                <Button className="mt-2" onClick={() => {}}>
+                  <Article size={20} className="mx-2" /> Recibo
+                </Button>
+              )}
+              {pedidoSelecionado?.statusPedido === "EM_PREPARO" && (
+                <Button className="mt-2" onClick={() => {}} color="failure">
+                  <Trash size={20} className="mx-2" /> Excluir pedido
+                </Button>
+              )}
             </div>
           </div>
         </Modal.Body>
@@ -177,10 +205,8 @@ export default function PedidosPage_VerPedido() {
           </Table.Head>
           <Table.Body className="divide-y">
             {mockPedido.map((pedido) => (
-              <Table.Row key={pedido.numero}>
-                <Table.Cell className="font-semibold text-center">
-                  {pedido.numero}
-                </Table.Cell>
+              <Table.Row key={pedido.numero} className="font-semibold">
+                <Table.Cell className="text-center">{pedido.numero}</Table.Cell>
                 <Table.Cell>
                   {formatDateFromYYYY_MM_DD_to_MMToDD_MM_YYYY(
                     pedido.dataInclusao
@@ -189,7 +215,13 @@ export default function PedidosPage_VerPedido() {
                 <Table.Cell>
                   {formatarParaBRL(pedido.valorCalculadoPedido)}
                 </Table.Cell>
-                <Table.Cell>{pedido.statusPedido}</Table.Cell>
+                <Table.Cell
+                  className={`${
+                    getCurrentStatusPedido(pedido.statusPedido)?.color
+                  }`}
+                >
+                  {getCurrentStatusPedido(pedido.statusPedido)?.value}
+                </Table.Cell>
                 <Table.Cell>{formatarParaBRL(pedido.valorPago)}</Table.Cell>
                 <Table.Cell>
                   {formatDateFromYYYY_MM_DD_to_MMToDD_MM_YYYY(

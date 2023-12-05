@@ -1177,14 +1177,22 @@ export const mockPedido = [
 ];
 
 export const mockStatusPedido = [
-  { label: "Aguardando pagamento", value: "AGUARDANDO_PAGAMENTO" },
-  { label: "Pago", value: "PAGO" },
-  { label: "Em preparo", value: "EM_PREPARO" },
-  { label: "Pago com diferença", value: "PAGO_COM_DIFERENÇA" },
-  { label: "Em produção", value: "EM_PRODUÇÃO" },
-  { label: "Concluído", value: "CONCLUIDO" },
-  { label: "Cancelado", value: "CANCELADO" },
-  { label: "Produzido", value: "PRODUZIDO" },
+  {
+    label: "Aguardando pagamento",
+    value: "AGUARDANDO_PAGAMENTO",
+    color: "text-yellow-500",
+  },
+  { label: "Pago", value: "PAGO", color: "text-green-500" },
+  { label: "Em preparo", value: "EM_PREPARO", color: "text-gray-500" },
+  {
+    label: "Pago com diferença",
+    value: "PAGO_COM_DIFERENÇA",
+    color: "text-blue-500",
+  },
+  { label: "Em produção", value: "EM_PRODUÇÃO", color: "text-yellow-500" },
+  { label: "Concluído", value: "CONCLUIDO", color: "text-green-500" },
+  { label: "Cancelado", value: "CANCELADO", color: "text-red-500" },
+  { label: "Produzido", value: "PRODUZIDO", color: "text-blue-500" },
 ];
 
 export const mockUsuario = {

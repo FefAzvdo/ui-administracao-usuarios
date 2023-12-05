@@ -1,4 +1,5 @@
 import { createElement, FunctionComponent, SVGProps, ReactNode } from "react";
+import { mockStatusPedido } from "../pages/mock";
 
 // Regex para validação de string no formato CNPJ
 export const regexCNPJ = /^\d{2}.\d{3}.\d{3}\/\d{4}-\d{2}$/;
@@ -280,4 +281,8 @@ export function convertPhosphorIcon(
   icon: ReactNode
 ): FunctionComponent<SVGProps<SVGSVGElement>> {
   return (props: SVGProps<SVGSVGElement>) => createElement("div", props, icon);
+}
+
+export function getCurrentStatusPedido(status: string) {
+  return mockStatusPedido.find((stat) => stat.value === status);
 }
