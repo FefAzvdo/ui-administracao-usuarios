@@ -9,7 +9,7 @@ import {
 } from "../utils";
 import { Tabs } from "flowbite-react";
 import { mockLojas, mockUsuario } from "./mock";
-import { House, Buildings } from "@phosphor-icons/react";
+import { House, Storefront } from "@phosphor-icons/react";
 import EnderecoContainer from "../components/EnderecoContainer";
 
 export default function PedidosPage_NovoPedido_Entrega() {
@@ -87,7 +87,6 @@ export default function PedidosPage_NovoPedido_Entrega() {
                   }
                   name={"Endereço " + index + 1}
                   onChange={() => {
-                    console.log("🚀 ~ endereco meu:", endereco);
                     setSelectedEndereco(endereco);
                     setPossuiTaxaDeEntrega(true);
                   }}
@@ -97,7 +96,7 @@ export default function PedidosPage_NovoPedido_Entrega() {
           </Tabs.Item>
           <Tabs.Item
             title="Entrega em loja"
-            icon={convertPhosphorIcon(<Buildings size={25} />)}
+            icon={convertPhosphorIcon(<Storefront size={25} />)}
           >
             <div className="mt-8 flex justify-between flex-row min-w-full flex-wrap">
               {mockLojas.map((loja) =>
@@ -110,7 +109,6 @@ export default function PedidosPage_NovoPedido_Entrega() {
                     }
                     name={loja.nome}
                     onChange={() => {
-                      console.log("🚀 ~ endereco:", endereco);
                       //@ts-expect-error mock
                       setSelectedEndereco(endereco);
                       setPossuiTaxaDeEntrega(false);

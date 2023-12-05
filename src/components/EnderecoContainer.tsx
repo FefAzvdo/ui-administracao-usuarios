@@ -17,10 +17,11 @@ export default function EnderecoContainer({
   return (
     <Label
       htmlFor={endereco.nrSeqEndereco.toString()}
-      className={`flex justify-between items-center border-2 rounded py-8 px-8 cursor-pointer w-full text-base m-4`}
+      className={`flex justify-between items-center border-2 rounded py-4 px-8 cursor-pointer w-full text-base m-4`}
       style={{
         width: window.innerWidth >= 768 ? "46%" : "100%",
         borderColor: isSelected ? "#0891b2" : "",
+        background: isSelected ? "#eee" : "",
       }}
     >
       <div className="flex flex-col">
