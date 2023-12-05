@@ -59,13 +59,13 @@ export default function PedidosPage_NovoPedido() {
 
   return (
     <MainLayout pageTitle="Novo pedido">
-      <div className="flex items-center">
+      <div className="flex items-center justify-end">
         <p className="text-lg">
           Quantidade de colaboradores:{" "}
           <span className="font-semibold">{selectedColaboradores.length}</span>
         </p>
       </div>
-      <div className="flex items-center">
+      <div className="flex items-center justify-end mb-4">
         <p className="text-lg">
           Valor total do pedido:{" "}
           <span className="font-semibold">

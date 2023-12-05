@@ -1,3 +1,5 @@
+import { createElement, FunctionComponent, SVGProps, ReactNode } from "react";
+
 // Regex para validação de string no formato CNPJ
 export const regexCNPJ = /^\d{2}.\d{3}.\d{3}\/\d{4}-\d{2}$/;
 
@@ -272,4 +274,10 @@ export function formatCurrencyBrlToFloat(numero: string): number {
   const centavos = numero.split(",")[1]; //45
 
   return Number.parseFloat(reais + "." + centavos);
+}
+
+export function convertPhosphorIcon(
+  icon: ReactNode
+): FunctionComponent<SVGProps<SVGSVGElement>> {
+  return (props: SVGProps<SVGSVGElement>) => createElement("div", props, icon);
 }

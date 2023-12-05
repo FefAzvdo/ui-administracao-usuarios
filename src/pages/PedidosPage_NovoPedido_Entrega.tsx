@@ -2,27 +2,32 @@ import { useLocation } from "react-router-dom";
 import MainLayout from "../components/MainLayout";
 import { useEffect, useState } from "react";
 import { ColaboratorType } from "../types";
-import { formatCurrencyBrlToFloat, formatarParaBRL } from "../utils";
-import { Label, Radio } from "flowbite-react";
-import { mockLojas } from "./mock";
+import {
+  convertPhosphorIcon,
+  formatCurrencyBrlToFloat,
+  formatarParaBRL,
+} from "../utils";
+import { Tabs } from "flowbite-react";
+import { mockLojas, mockUsuario } from "./mock";
+import { House, Buildings } from "@phosphor-icons/react";
+import EnderecoContainer from "../components/EnderecoContainer";
 
 export default function PedidosPage_NovoPedido_Entrega() {
   const params = useLocation();
   const [selectedColaboradores, setSelectedColaboradores] = useState<
     ColaboratorType[]
   >([]);
-  const [taxaDeEntrega, setTaxaDeEntrega] = useState(0);
+  const [valorTaxaDeEntrega, setValorTaxaDeEntrega] = useState(0);
+  const [possuiTaxaDeEntrega, setPossuiTaxaDeEntrega] = useState<boolean>(true);
+  const [selectedEndereco, setSelectedEndereco] = useState({
+    ...mockUsuario.enderecos[0],
+  });
 
   useEffect(() => {
     setSelectedColaboradores(params.state.selectedColaboradores);
 
-    // if (
-    //   params.state.selectedColaboradores.find(
-    //     (colaborador: { tipoDePedido: string; }) => colaborador.tipoDePedido === "cartao-com-recarga"
-    //   ) !== undefined
-    // ) {
-    //   setTaxaDeEntrega(20)
-    // }
+    //calcular taxa de entrega via api
+    setValorTaxaDeEntrega(20);
   }, []);
 
   const valorDosItens = formatarParaBRL(
@@ -34,6 +39,11 @@ export default function PedidosPage_NovoPedido_Entrega() {
     )
   );
 
+  const hasDeliveryItems =
+    selectedColaboradores.find(
+      (colab) => colab.tipoDePedido === "cartao-com-recarga"
+    ) !== undefined;
+
   return (
     <MainLayout pageTitle="Pedido 1452">
       <div className="flex justify-start items-center gap-8">
@@ -44,39 +54,76 @@ export default function PedidosPage_NovoPedido_Entrega() {
         <div className="text-2xl font-semibold">
           Taxa de entrega:{" "}
           <span className="text-green-400">
-            {formatarParaBRL(taxaDeEntrega)}
+            {formatarParaBRL(
+              possuiTaxaDeEntrega && hasDeliveryItems ? valorTaxaDeEntrega : 0
+            )}
           </span>
         </div>
         <div className="text-2xl font-semibold">
           Valor total:{" "}
           <span className="text-green-400">
             {formatarParaBRL(
-              formatCurrencyBrlToFloat(valorDosItens) + taxaDeEntrega
+              possuiTaxaDeEntrega && hasDeliveryItems
+                ? formatCurrencyBrlToFloat(valorDosItens) + valorTaxaDeEntrega
+                : formatCurrencyBrlToFloat(valorDosItens)
             )}
           </span>
         </div>
       </div>
-      <div className="mt-8 flex flex-row min-w-full flex-wrap">
-        {mockLojas.map((loja) =>
-          loja.enderecos.map((endereco) => (
-            <Label
-              htmlFor={endereco.nrSeqEndereco.toString()}
-              className="flex justify-between items-center border rounded py-8 px-20 cursor-pointer w-full md:w-1/2 text-base"
-            >
-              <div className="flex flex-col">
-                <span className="text-gray-400 text-sm">{loja.nome}</span>
-                {endereco.logradouro + ", "}
-                {endereco.numero + " - " + endereco.complemento}
-              </div>
-              <Radio
-                id={endereco.nrSeqEndereco.toString()}
-                name="endereco"
-                value={endereco.nrSeqEndereco}
-              />
-            </Label>
-          ))
-        )}
-      </div>
+      {hasDeliveryItems ? (
+        <Tabs aria-label="Default tabs" style="default" className="mt-4">
+          <Tabs.Item
+            active
+            title="Entrega em domicílio"
+            icon={convertPhosphorIcon(<House size={25} />)}
+          >
+            <div className="mt-8 flex justify-between flex-row min-w-full flex-wrap">
+              {mockUsuario.enderecos.map((endereco, index) => (
+                <EnderecoContainer
+                  //@ts-expect-error mock
+                  endereco={endereco}
+                  isSelected={
+                    selectedEndereco?.nrSeqEndereco === endereco.nrSeqEndereco
+                  }
+                  name={"Endereço " + index + 1}
+                  onChange={() => {
+                    console.log("🚀 ~ endereco meu:", endereco);
+                    setSelectedEndereco(endereco);
+                    setPossuiTaxaDeEntrega(true);
+                  }}
+                />
+              ))}
+            </div>
+          </Tabs.Item>
+          <Tabs.Item
+            title="Entrega em loja"
+            icon={convertPhosphorIcon(<Buildings size={25} />)}
+          >
+            <div className="mt-8 flex justify-between flex-row min-w-full flex-wrap">
+              {mockLojas.map((loja) =>
+                loja.enderecos.map((endereco) => (
+                  <EnderecoContainer
+                    //@ts-expect-error mock
+                    endereco={endereco}
+                    isSelected={
+                      selectedEndereco?.nrSeqEndereco === endereco.nrSeqEndereco
+                    }
+                    name={loja.nome}
+                    onChange={() => {
+                      console.log("🚀 ~ endereco:", endereco);
+                      //@ts-expect-error mock
+                      setSelectedEndereco(endereco);
+                      setPossuiTaxaDeEntrega(false);
+                    }}
+                  />
+                ))
+              )}
+            </div>
+          </Tabs.Item>
+        </Tabs>
+      ) : (
+        <p className="mt-8">Seu pedido não possui itens entregáveis</p>
+      )}
     </MainLayout>
   );
 }
