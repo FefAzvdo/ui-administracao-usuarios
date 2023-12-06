@@ -484,7 +484,9 @@ export default function ColaboradoresPage() {
                 </Table.Cell>
                 <Table.Cell>{colaborador.email}</Table.Cell>
                 <Table.Cell>
-                  {formatarTelefone(colaborador.telefone)}
+                  {colaborador.telefone !== undefined
+                    ? formatarTelefone(colaborador.telefone)
+                    : ""}
                 </Table.Cell>
                 <Table.Cell>
                   {formatarParaBRL(colaborador.valorUsoDiario)}
@@ -496,6 +498,7 @@ export default function ColaboradoresPage() {
                     onClick={() => {
                       setModalType("EDITAR");
                       setIsModalOpened(true);
+                      //@ts-expect-error mock
                       setColaboratorValues(colaborador);
                     }}
                   >
@@ -505,6 +508,7 @@ export default function ColaboradoresPage() {
                     className="font-medium text-red-600 dark:text-red-500 hover:underline cursor-pointer"
                     onClick={() => {
                       setIsDesassocModalOpened(true);
+                      //@ts-expect-error mock
                       setColaboratorValues(colaborador);
                     }}
                   >

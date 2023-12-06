@@ -220,7 +220,7 @@ export default function PedidosPage_VerPedido() {
                     getCurrentStatusPedido(pedido.statusPedido)?.color
                   }`}
                 >
-                  {getCurrentStatusPedido(pedido.statusPedido)?.value}
+                  {getCurrentStatusPedido(pedido.statusPedido)?.label}
                 </Table.Cell>
                 <Table.Cell>{formatarParaBRL(pedido.valorPago)}</Table.Cell>
                 <Table.Cell>

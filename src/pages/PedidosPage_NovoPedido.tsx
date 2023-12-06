@@ -1,4 +1,4 @@
-import { useState, ChangeEvent, useEffect } from "react";
+import { useState, useEffect } from "react";
 import MainLayout from "../components/MainLayout";
 import { Button, Checkbox, Table } from "flowbite-react";
 import { mockColaboradores } from "./mock";
@@ -20,19 +20,29 @@ export default function PedidosPage_NovoPedido() {
   const params = useLocation();
 
   useEffect(() => {
-    console.log(params.state.pedidoSelecionado);
-    setSelectedColaboradores(params.state.pedidoSelecionado.itensPedido);
+    if (params.state !== null) {
+      const itensPedidoModified =
+        params.state.pedidoSelecionado.itensPedido.map(
+          (colab: { documento: string }) => {
+            return { ...colab, numeroDocumento: colab.documento };
+          }
+        );
+
+      itensPedidoModified.forEach((colab: ColaboratorType) =>
+        handleChangeCheckbox(true, colab)
+      );
+
+      setSelectedColaboradores(itensPedidoModified);
+    }
   }, []);
 
   function handleChangeCheckbox(
-    event: ChangeEvent<HTMLInputElement>,
+    isChecking: boolean,
     colaborador: ColaboratorType
   ) {
-    const isChecking = event.target.checked;
-
     const editedColab = {
       ...colaborador,
-      valorDaRecarga: 22 * colaborador.valorUsoDiario,
+      valor: 22 * colaborador.valorUsoDiario,
       tipoDePedido: "recarga-na-conta",
     };
 
@@ -40,7 +50,9 @@ export default function PedidosPage_NovoPedido() {
       setSelectedColaboradores([...selectedColaboradores, editedColab]);
     } else {
       const withoutColaboratorSelected = selectedColaboradores.filter(
-        (colab) => colab.numeroDocumento !== colaborador.numeroDocumento
+        (colab) => {
+          return colab.numeroDocumento !== colaborador.numeroDocumento;
+        }
       );
 
       setSelectedColaboradores(withoutColaboratorSelected);
@@ -60,12 +72,14 @@ export default function PedidosPage_NovoPedido() {
   const isWithoutErrors =
     selectedColaboradores.find(
       (colab) =>
-        Number.parseFloat(colab.valorDaRecarga.toString()) < 23 ||
-        Number.parseFloat(colab.valorDaRecarga.toString()) > 3000
+        Number.parseFloat(colab.valor.toString()) < 23 ||
+        Number.parseFloat(colab.valor.toString()) > 3000
     ) === undefined;
 
   return (
-    <MainLayout pageTitle="Novo pedido">
+    <MainLayout
+      pageTitle={params.state !== null ? "Editar pedido" : "Novo pedido"}
+    >
       <div className="flex items-center justify-end">
         <p className="text-lg">
           Quantidade de colaboradores:{" "}
@@ -80,7 +94,7 @@ export default function PedidosPage_NovoPedido() {
               selectedColaboradores.reduce(
                 (acumulador, item) =>
                   Number.parseFloat(acumulador.toString()) +
-                  Number.parseFloat(item.valorDaRecarga.toString()),
+                  Number.parseFloat(item.valor.toString()),
                 0
               )
             )}
@@ -117,8 +131,17 @@ export default function PedidosPage_NovoPedido() {
               >
                 <Table.Cell className="w-10 text-center ">
                   <Checkbox
+                    checked={
+                      selectedColaboradores.find(
+                        (colab) =>
+                          colab.numeroDocumento === colaborador.numeroDocumento
+                      ) !== undefined
+                    }
                     className="cursor-pointer"
-                    onChange={(e) => handleChangeCheckbox(e, colaborador)}
+                    onChange={(e) => {
+                      //@ts-expect-error mock
+                      handleChangeCheckbox(e.target.checked, colaborador);
+                    }}
                   />
                 </Table.Cell>
                 <Table.Cell>
@@ -136,6 +159,7 @@ export default function PedidosPage_NovoPedido() {
                     <div className="flex gap-4 flex-col">
                       <RadioButtonTipoPedido
                         defaultChecked
+                        //@ts-expect-error mock
                         colaborador={colaborador}
                         labelName="Recarga na Conta Jaé VT"
                         labelColor="text-green-500"
@@ -181,11 +205,11 @@ export default function PedidosPage_NovoPedido() {
                           (colabs) => {
                             return {
                               ...colabs,
-                              valorDaRecarga:
+                              valor:
                                 colaborador.numeroDocumento ===
                                 colabs.numeroDocumento
                                   ? formatCurrencyBrlToFloat(valorInput)
-                                  : colabs.valorDaRecarga,
+                                  : colabs.valor,
                             };
                           }
                         );

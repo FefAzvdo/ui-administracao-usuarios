@@ -21,7 +21,8 @@ export type ColaboratorType = {
   valorCombustivel: number;
   numeroLogicoMidia: number;
   tipoDePedido: string;
-  valorDaRecarga: number | string;
+  valorDaRecarga: number | string; //deletar
+  valor: number | string;
 };
 
 export type PedidoType = {

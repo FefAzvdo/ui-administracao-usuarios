@@ -34,7 +34,7 @@ export default function PedidosPage_NovoPedido_Entrega() {
     selectedColaboradores.reduce(
       (acumulador, item) =>
         Number.parseFloat(acumulador.toString()) +
-        Number.parseFloat(item.valorDaRecarga.toString()),
+        Number.parseFloat(item.valor.toString()),
       0
     )
   );
@@ -80,6 +80,7 @@ export default function PedidosPage_NovoPedido_Entrega() {
             <div className="mt-8 flex justify-between flex-row min-w-full flex-wrap">
               {mockUsuario.enderecos.map((endereco, index) => (
                 <EnderecoContainer
+                  key={endereco.nrSeqEndereco}
                   //@ts-expect-error mock
                   endereco={endereco}
                   isSelected={
@@ -102,6 +103,7 @@ export default function PedidosPage_NovoPedido_Entrega() {
               {mockLojas.map((loja) =>
                 loja.enderecos.map((endereco) => (
                   <EnderecoContainer
+                    key={endereco.nrSeqEndereco}
                     //@ts-expect-error mock
                     endereco={endereco}
                     isSelected={
