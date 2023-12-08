@@ -42,7 +42,10 @@ export default function PedidosPage_NovoPedido() {
   ) {
     const editedColab = {
       ...colaborador,
-      valor: 22 * colaborador.valorUsoDiario,
+      valor:
+        params.state !== null
+          ? colaborador.valor
+          : 22 * colaborador.valorUsoDiario,
       tipoDePedido: "recarga-na-conta",
     };
 
@@ -198,7 +201,9 @@ export default function PedidosPage_NovoPedido() {
                   ) !== undefined ? (
                     <CurrencyInput
                       valorDeUsoDiario={formatarParaBRL(
-                        colaborador.valorUsoDiario * 22
+                        params.state !== null
+                          ? colaborador.valor
+                          : colaborador.valorUsoDiario * 22
                       )}
                       onChange={(valorInput) => {
                         const newSelectedColabs = selectedColaboradores.map(

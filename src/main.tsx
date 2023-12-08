@@ -10,6 +10,7 @@ import ColaboradoresPage from "./pages/ColaboradoresPage.tsx";
 import PedidosPage_NovoPedido from "./pages/PedidosPage_NovoPedido.tsx";
 import PedidosPage_VerPedidos from "./pages/PedidosPage_VerPedidos.tsx";
 import PedidosPage_NovoPedido_Entrega from "./pages/PedidosPage_NovoPedido_Entrega.tsx";
+import EditarPerfilPage from "./pages/EditarPerfilPage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
   {
     path: "/novo-pedido/entrega",
     element: <PedidosPage_NovoPedido_Entrega />,
+  },
+  {
+    path: "/editar-perfil",
+    element: <EditarPerfilPage />,
   },
 ]);
 

@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import billingpayLogo from "../assets/bp_logo.png";
 import usuarioPlaceholder from "../assets/usuario-placeholder.jpg";
 import { Avatar, Dropdown, Navbar } from "flowbite-react";
@@ -19,6 +19,7 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const location = useLocation();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -72,7 +73,9 @@ export default function MainLayout({
                   empresateste@gmail.com
                 </span>
               </Dropdown.Header>
-              <Dropdown.Item>Ver perfil</Dropdown.Item>
+              <Dropdown.Item onClick={() => navigate("/editar-perfil")}>
+                Ver perfil
+              </Dropdown.Item>
               <Dropdown.Divider />
               <Dropdown.Item className="text-red-500">Sair</Dropdown.Item>
             </Dropdown>

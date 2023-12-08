@@ -22,7 +22,6 @@ function CadsatroPage_01() {
   const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
-    console.log(data);
     navigateToPage(data);
   };
 
