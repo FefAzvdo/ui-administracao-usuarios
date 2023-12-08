@@ -1,6 +1,6 @@
-import { Eye, House, Pencil, PlusCircle, User } from "@phosphor-icons/react";
+import { Eye, House, PlusCircle, User } from "@phosphor-icons/react";
 import MainLayout from "../components/MainLayout";
-import { Button, Modal, Tabs } from "flowbite-react";
+import { Modal, Tabs } from "flowbite-react";
 import {
   convertPhosphorIcon,
   isCnpjValid,
@@ -14,6 +14,7 @@ import { mockUsuario } from "./mock";
 import { useEffect, useState } from "react";
 import { EnderecoType } from "../types";
 import axios from "axios";
+import EnderecoContainerMeuPerfil from "../components/EnderecoContainerMeuPerfil";
 
 type InputsPerfil = {
   nome: string;
@@ -30,53 +31,6 @@ type InputsEndereco = {
   bairro: string;
   cidade: string;
   estado: string;
-};
-
-const EnderecoContainerMeuPerfil = ({
-  endereco,
-  onClickEditar,
-}: {
-  endereco: EnderecoType;
-  onClickEditar: () => void;
-}) => {
-  const { cep, logradouro, numero, complemento, bairro, cidade, uf } = endereco;
-
-  const enderecoArr = [
-    { label: "Logradouro", value: logradouro },
-    { label: "Número", value: numero },
-    { label: "Complemento", value: complemento },
-    { label: "Bairro", value: bairro },
-    { label: "Cidade", value: cidade },
-    { label: "Uf", value: uf },
-  ];
-
-  return (
-    <div className="border-2 p-4 text-lg" style={{ width: "33rem" }}>
-      <div className="flex justify-between items-center">
-        <div className="flex flex-row font-semibold">
-          <div>
-            <House size={25} className="mr-2" />
-          </div>
-          <div>CEP: {cep}</div>
-        </div>
-        <div>
-          <Pencil
-            size={25}
-            className="cursor-pointer"
-            onClick={() => onClickEditar()}
-          />
-        </div>
-      </div>
-      <hr className="my-2" />
-      {enderecoArr.map((end) => {
-        return (
-          <div className="flex justify-between">
-            {end.label}: <span className="font-semibold">{end.value}</span>
-          </div>
-        );
-      })}
-    </div>
-  );
 };
 
 export default function EditarPerfilPage() {
@@ -116,6 +70,7 @@ export default function EditarPerfilPage() {
 
   const onSubmitEditarEndereco: SubmitHandler<InputsEndereco> = (data) => {
     console.log("🚀 ~ data:", data);
+    setShowAddressModal(false);
     alert("CHAMAR API ALTERAR DADOS ENDEREÇO");
   };
 
@@ -176,6 +131,7 @@ export default function EditarPerfilPage() {
         <Modal.Body>
           <div className="flex justify-center items-center h-full">
             <form
+              id="hook-form"
               onSubmit={handleSubmitEditarEndereco(onSubmitEditarEndereco)}
               className="flex flex-col max-w-xl w-11/12"
             >
@@ -301,17 +257,14 @@ export default function EditarPerfilPage() {
                   </span>
                 )}
               </div>
+              <input
+                type="submit"
+                value={"Alterar"}
+                className={sumbitButtonStyle}
+              />
             </form>
           </div>
         </Modal.Body>
-        <Modal.Footer>
-          <Button onClick={() => setShowAddressModal(false)}>
-            Alterar endereço
-          </Button>
-          <Button color="gray" onClick={() => setShowAddressModal(false)}>
-            Cancelar
-          </Button>
-        </Modal.Footer>
       </Modal>
       <Tabs>
         <Tabs.Item
@@ -442,10 +395,11 @@ export default function EditarPerfilPage() {
           title="Meus endereços"
           icon={convertPhosphorIcon(<House size={25} />)}
         >
-          <div className="flex justify-center">
+          <div className="flex justify-center flex-col items-center">
             {enderecos.map((endereco) => {
               return (
                 <EnderecoContainerMeuPerfil
+                  key={endereco.nrSeqEndereco}
                   //@ts-expect-error mock
                   endereco={endereco}
                   //@ts-expect-error mock
