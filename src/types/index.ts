@@ -1,3 +1,27 @@
+export {};
+
+declare global {
+  interface Window {
+    config: {
+      background_color: string;
+      tenant: string;
+      card: string;
+      icon: string;
+      favicon: string;
+      logo: string;
+      bannerLogin: string;
+      theme_color: string;
+      loginUrl: string;
+      baseUrl: string;
+      cardTransporte: string;
+      cardTransportePne: string;
+      cardTransporteSenior: string;
+      cardTransporteEstudante: string;
+      nomeUser: string;
+    }; // whatever type you want to give. (any,number,float etc)
+  }
+}
+
 export type ColaboratorType = {
   idClientePrincipal: number;
   idPerfilClientePrincipal: number;

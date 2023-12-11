@@ -1,7 +1,30 @@
+import axios from "axios";
 import banner from "../assets/mulher-rh.jpg";
 import { Link } from "react-router-dom";
+import Cookies from "universal-cookie";
+
+const cookies = new Cookies(null, { path: "/" });
 
 function MainPage() {
+  function autenticar() {
+    axios
+      .post(
+        `https://api.dev.billingpay.com.br/autenticacao`,
+        {
+          senha: "#Trocar123",
+          usuario: "15355251773",
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((res) => {
+        cookies.set("TOKEN", res.data.token);
+      });
+  }
+
   return (
     <div className="flex">
       <div className="bg-black absolute top-0 left-0 w-full h-full bg-opacity-50" />
@@ -34,6 +57,9 @@ function MainPage() {
           >
             Entrar
           </Link>
+          <button className="text-white" onClick={autenticar}>
+            Autenticar
+          </button>
         </div>
       </div>
     </div>
