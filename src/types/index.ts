@@ -36,7 +36,7 @@ export type PedidoType = {
   valorPago: number;
   dataPagamento?: string;
   dataInclusao: string;
-  itensPedido: ItensPedido[];
+  itensPedido: ItensPedidoType[];
   pagamentosPedido: PagamentosPedido[];
   nrSeqEndereco: number;
   podeExcluir: boolean;
@@ -51,7 +51,7 @@ type PagamentosPedido = {
   tipoBaixa?: string;
   usuario?: number;
 };
-type ItensPedido = {
+export type ItensPedidoType = {
   numeroItem: number;
   idCliente: number;
   usuario: string;

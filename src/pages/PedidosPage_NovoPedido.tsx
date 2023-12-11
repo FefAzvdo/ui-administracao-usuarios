@@ -5,7 +5,7 @@ import { mockColaboradores } from "./mock";
 import {
   formatCurrencyBrlToFloat,
   formatarCPF,
-  formatarParaBRL,
+  formatCurrencyToBRL,
 } from "../utils";
 import { ColaboratorType } from "../types";
 import { RadioButtonTipoPedido } from "../components/RadioButtonTipoPedido";
@@ -93,7 +93,7 @@ export default function PedidosPage_NovoPedido() {
         <p className="text-lg">
           Valor total do pedido:{" "}
           <span className="font-semibold">
-            {formatarParaBRL(
+            {formatCurrencyToBRL(
               selectedColaboradores.reduce(
                 (acumulador, item) =>
                   Number.parseFloat(acumulador.toString()) +
@@ -200,7 +200,7 @@ export default function PedidosPage_NovoPedido() {
                       colab.numeroDocumento === colaborador.numeroDocumento
                   ) !== undefined ? (
                     <CurrencyInput
-                      valorDeUsoDiario={formatarParaBRL(
+                      valorDeUsoDiario={formatCurrencyToBRL(
                         params.state !== null
                           ? colaborador.valor
                           : colaborador.valorUsoDiario * 22

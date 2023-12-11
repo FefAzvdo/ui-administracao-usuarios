@@ -1236,8 +1236,8 @@ export const mockStatusPedido = [
     value: "AGUARDANDO_PAGAMENTO",
     color: "text-yellow-500",
   },
-  { label: "Pago", value: "PAGO", color: "text-green-500" },
   { label: "Em preparo", value: "EM_PREPARO", color: "text-gray-500" },
+  { label: "Pago", value: "PAGO", color: "text-green-500" },
   {
     label: "Pago com diferença",
     value: "PAGO_COM_DIFERENÇA",

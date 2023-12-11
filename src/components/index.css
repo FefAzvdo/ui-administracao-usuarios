@@ -1,5 +1,5 @@
 #navbar-component > div {
-  max-width: 1280px;
+  max-width: 1536px;
 }
 
 @media (min-width: 768px) {

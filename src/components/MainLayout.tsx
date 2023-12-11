@@ -4,6 +4,7 @@ import usuarioPlaceholder from "../assets/usuario-placeholder.jpg";
 import { Avatar, Dropdown, Navbar } from "flowbite-react";
 
 import "./index.css";
+import { mockUsuario } from "../pages/mock";
 
 const menuItems = [
   { title: "Colaboradores", path: "/colaboradores" },
@@ -68,22 +69,27 @@ export default function MainLayout({
               }
             >
               <Dropdown.Header>
-                <span className="block text-sm">Empresa teste</span>
+                <span className="block text-sm">{mockUsuario.nome}</span>
                 <span className="block truncate text-sm font-medium">
-                  empresateste@gmail.com
+                  {mockUsuario.email}
                 </span>
               </Dropdown.Header>
               <Dropdown.Item onClick={() => navigate("/editar-perfil")}>
                 Ver perfil
               </Dropdown.Item>
               <Dropdown.Divider />
-              <Dropdown.Item className="text-red-500">Sair</Dropdown.Item>
+              <Dropdown.Item
+                className="text-red-500"
+                onClick={() => navigate("/")}
+              >
+                Sair
+              </Dropdown.Item>
             </Dropdown>
           </Navbar.Collapse>
         </Navbar>
       </div>
       <div className="flex justify-center py-2">
-        <div className="max-w-screen-2xl w-full md:p-4">
+        <div className="max-w-screen-2xl w-full">
           <h1 className="mb-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900 md:text-3xl lg:text-4xl dark:text-white">
             {pageTitle}
           </h1>

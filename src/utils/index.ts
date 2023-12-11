@@ -121,7 +121,10 @@ export function onlyNumbers(text: string) {
   return text.replace(/\D/g, "");
 }
 
-export function formatarParaBRL(numero: number | string): string {
+export function formatCurrencyToBRL(
+  numero: number | string | undefined
+): string {
+  if (numero === undefined) return "";
   return numero.toLocaleString("pt-br", { style: "currency", currency: "BRL" });
 }
 
@@ -225,8 +228,9 @@ export function isDateDD_MM_YYYY_Valid(input: string): boolean {
 }
 
 export function formatDateFromYYYY_MM_DD_to_MMToDD_MM_YYYY(
-  data: string
+  data: string | undefined
 ): string {
+  if (data === undefined) return "";
   try {
     // Usa split para separar o tempo
     const firstPart = data.split("T")[0];
@@ -283,6 +287,19 @@ export function convertPhosphorIcon(
   return (props: SVGProps<SVGSVGElement>) => createElement("div", props, icon);
 }
 
-export function getCurrentStatusPedido(status: string) {
+export function getCurrentStatusPedido(status: string | undefined):
+  | {
+      label: string;
+      value: string;
+      color: string;
+    }
+  | undefined {
+  if (mockStatusPedido.find((stat) => stat.value === status) === undefined) {
+    return {
+      label: "",
+      value: "",
+      color: "",
+    };
+  }
   return mockStatusPedido.find((stat) => stat.value === status);
 }

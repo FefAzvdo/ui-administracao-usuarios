@@ -11,6 +11,8 @@ import PedidosPage_NovoPedido from "./pages/PedidosPage_NovoPedido.tsx";
 import PedidosPage_VerPedidos from "./pages/PedidosPage_VerPedidos.tsx";
 import PedidosPage_NovoPedido_Entrega from "./pages/PedidosPage_NovoPedido_Entrega.tsx";
 import EditarPerfilPage from "./pages/EditarPerfilPage.tsx";
+import ImportacoesPage from "./pages/ImportaçoesPage.tsx";
+import PedidoPage_DetalhePedido from "./pages/PedidosPage_DetalhePedido.tsx";
 
 const router = createBrowserRouter([
   {
@@ -48,6 +50,14 @@ const router = createBrowserRouter([
   {
     path: "/editar-perfil",
     element: <EditarPerfilPage />,
+  },
+  {
+    path: "/importacoes",
+    element: <ImportacoesPage />,
+  },
+  {
+    path: "/detalhe-pedido",
+    element: <PedidoPage_DetalhePedido />,
   },
 ]);
 

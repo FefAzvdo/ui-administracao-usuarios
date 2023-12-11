@@ -17,7 +17,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import {
   formatDateFromYYYY_MM_DD_to_MMToDD_MM_YYYY,
-  formatarParaBRL,
+  formatCurrencyToBRL,
   getCurrentStatusPedido,
 } from "../utils";
 import { useState } from "react";
@@ -37,6 +37,14 @@ export default function PedidosPage_VerPedido() {
 
   function handleClickEditarPedido(pedidoSelecionado: PedidoType) {
     navigate("/novo-pedido", {
+      state: {
+        pedidoSelecionado,
+      },
+    });
+  }
+
+  function handleClickVisualizarPedido(pedidoSelecionado: PedidoType) {
+    navigate("/detalhe-pedido", {
       state: {
         pedidoSelecionado,
       },
@@ -162,29 +170,61 @@ export default function PedidosPage_VerPedido() {
                   <Pencil size={20} className="mx-2" /> Editar
                 </Button>
               )}
-              <Button className="mt-2" onClick={() => {}}>
+              <Button
+                className="mt-2"
+                onClick={() => {
+                  //@ts-expect-error mock
+                  handleClickVisualizarPedido(pedidoSelecionado);
+                }}
+              >
                 <Eye size={20} className="mx-2" /> Visualizar
               </Button>
-              <Button className="mt-2" onClick={() => {}}>
+              <Button
+                className="mt-2"
+                onClick={() => {
+                  alert("CHAMAR API DUPLICAR PEDIDO");
+                }}
+              >
                 <CopySimple size={20} className="mx-2" /> Duplicar
               </Button>
               {pedidoSelecionado?.statusPedido === "EM_PREPARO" && (
-                <Button className="mt-2" onClick={() => {}}>
+                <Button
+                  className="mt-2"
+                  onClick={() => {
+                    alert("CHAMAR API FINALIZAR PEDIDO");
+                  }}
+                >
                   <Check size={20} className="mx-2" /> Finalizar
                 </Button>
               )}
               {pedidoSelecionado?.statusPedido === "AGUARDANDO_PAGAMENTO" && (
-                <Button className="mt-2" onClick={() => {}}>
+                <Button
+                  className="mt-2"
+                  onClick={() => {
+                    alert("CHAMAR API GERAR BOLETO");
+                  }}
+                >
                   <Receipt size={20} className="mx-2" /> Boleto
                 </Button>
               )}
               {pedidoSelecionado?.statusPedido === "PAGO" && (
-                <Button className="mt-2" onClick={() => {}}>
+                <Button
+                  className="mt-2"
+                  onClick={() => {
+                    alert("CHAMAR API GERAR RECIBO");
+                  }}
+                >
                   <Article size={20} className="mx-2" /> Recibo
                 </Button>
               )}
               {pedidoSelecionado?.statusPedido === "EM_PREPARO" && (
-                <Button className="mt-2" onClick={() => {}} color="failure">
+                <Button
+                  className="mt-2"
+                  onClick={() => {
+                    alert("CHAMAR API EXCLUIR PEDIDO");
+                  }}
+                  color="failure"
+                >
                   <Trash size={20} className="mx-2" /> Excluir pedido
                 </Button>
               )}
@@ -213,7 +253,7 @@ export default function PedidosPage_VerPedido() {
                   )}
                 </Table.Cell>
                 <Table.Cell>
-                  {formatarParaBRL(pedido.valorCalculadoPedido)}
+                  {formatCurrencyToBRL(pedido.valorCalculadoPedido)}
                 </Table.Cell>
                 <Table.Cell
                   className={`${
@@ -222,7 +262,7 @@ export default function PedidosPage_VerPedido() {
                 >
                   {getCurrentStatusPedido(pedido.statusPedido)?.label}
                 </Table.Cell>
-                <Table.Cell>{formatarParaBRL(pedido.valorPago)}</Table.Cell>
+                <Table.Cell>{formatCurrencyToBRL(pedido.valorPago)}</Table.Cell>
                 <Table.Cell>
                   {formatDateFromYYYY_MM_DD_to_MMToDD_MM_YYYY(
                     pedido.dataPagamento ?? ""

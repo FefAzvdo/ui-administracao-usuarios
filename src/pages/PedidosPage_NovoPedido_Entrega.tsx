@@ -5,7 +5,7 @@ import { ColaboratorType } from "../types";
 import {
   convertPhosphorIcon,
   formatCurrencyBrlToFloat,
-  formatarParaBRL,
+  formatCurrencyToBRL,
 } from "../utils";
 import { Tabs } from "flowbite-react";
 import { mockLojas, mockUsuario } from "./mock";
@@ -30,7 +30,7 @@ export default function PedidosPage_NovoPedido_Entrega() {
     setValorTaxaDeEntrega(20);
   }, []);
 
-  const valorDosItens = formatarParaBRL(
+  const valorDosItens = formatCurrencyToBRL(
     selectedColaboradores.reduce(
       (acumulador, item) =>
         Number.parseFloat(acumulador.toString()) +
@@ -54,7 +54,7 @@ export default function PedidosPage_NovoPedido_Entrega() {
         <div className="text-2xl font-semibold">
           Taxa de entrega:{" "}
           <span className="text-green-400">
-            {formatarParaBRL(
+            {formatCurrencyToBRL(
               possuiTaxaDeEntrega && hasDeliveryItems ? valorTaxaDeEntrega : 0
             )}
           </span>
@@ -62,7 +62,7 @@ export default function PedidosPage_NovoPedido_Entrega() {
         <div className="text-2xl font-semibold">
           Valor total:{" "}
           <span className="text-green-400">
-            {formatarParaBRL(
+            {formatCurrencyToBRL(
               possuiTaxaDeEntrega && hasDeliveryItems
                 ? formatCurrencyBrlToFloat(valorDosItens) + valorTaxaDeEntrega
                 : formatCurrencyBrlToFloat(valorDosItens)

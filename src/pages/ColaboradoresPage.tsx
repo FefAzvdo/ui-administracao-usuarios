@@ -3,7 +3,7 @@ import MainLayout from "../components/MainLayout";
 import {
   formatarCPF,
   formatarValorInputParaMoedaBRL,
-  formatarParaBRL,
+  formatCurrencyToBRL,
   formatarTelefone,
   isCpfValid,
   isDateDD_MM_YYYY_Valid,
@@ -117,7 +117,10 @@ export default function ColaboradoresPage() {
     setValue("sexo", colaborador.sexo);
     setValue("celular", setMaskNumeroCelular(colaborador.telefone));
     setValue("email", colaborador.email);
-    setValue("valorDeUsoDiario", formatarParaBRL(colaborador.valorUsoDiario));
+    setValue(
+      "valorDeUsoDiario",
+      formatCurrencyToBRL(colaborador.valorUsoDiario)
+    );
   };
 
   const closeAndCleanModal = () => {
@@ -489,7 +492,7 @@ export default function ColaboradoresPage() {
                     : ""}
                 </Table.Cell>
                 <Table.Cell>
-                  {formatarParaBRL(colaborador.valorUsoDiario)}
+                  {formatCurrencyToBRL(colaborador.valorUsoDiario)}
                 </Table.Cell>
                 <Table.Cell>{colaborador.nome ? "Não" : "Sim"}</Table.Cell>
                 <Table.Cell className="flex gap-3">
