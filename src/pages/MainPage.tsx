@@ -1,6 +1,7 @@
 import axios from "axios";
 import banner from "../assets/mulher-rh.jpg";
 import { Link } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 function MainPage() {
   function autenticar() {
@@ -8,7 +9,7 @@ function MainPage() {
       .post(
         `https://api.dev.billingpay.com.br/autenticacao`,
         {
-          senha: "#Trocar1234",
+          senha: "#Trocar123",
           usuario: "15355251773",
         },
         {
@@ -18,7 +19,14 @@ function MainPage() {
         }
       )
       .then((res) => {
-        window.sessionStorage.setItem("TOKEN", res.data.token);
+        const token = res.data.token;
+        window.sessionStorage.setItem("TOKEN", token);
+
+        const decodedToken = jwtDecode(token);
+        window.sessionStorage.setItem(
+          "DECODED_TOKEN",
+          JSON.stringify(decodedToken)
+        );
       })
       .catch((err) => {
         console.log("🚀 ~ err:", err);
