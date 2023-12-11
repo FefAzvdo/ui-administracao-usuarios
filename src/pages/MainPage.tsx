@@ -1,23 +1,18 @@
 import axios from "axios";
 import banner from "../assets/mulher-rh.jpg";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { api } from "../api";
 
 function MainPage() {
-  function autenticar() {
+  const navigate = useNavigate();
+
+  async function autenticar() {
     axios
-      .post(
-        `https://api.dev.billingpay.com.br/autenticacao`,
-        {
-          senha: "#Trocar123",
-          usuario: "15355251773",
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      )
+      .post(`https://api.dev.billingpay.com.br/autenticacao`, {
+        senha: "#Trocar123",
+        usuario: "21369699000131",
+      })
       .then((res) => {
         const token = res.data.token;
         window.sessionStorage.setItem("TOKEN", token);
@@ -27,6 +22,25 @@ function MainPage() {
           "DECODED_TOKEN",
           JSON.stringify(decodedToken)
         );
+
+        api
+          .get(
+            `https://api.dev.billingpay.com.br/cliente/conta-acesso/${decodedToken.jti}`
+          )
+          .then((res) => {
+            window.sessionStorage.setItem(
+              "DADOS_EMPRESA",
+              JSON.stringify(res.data)
+            );
+
+            const isEmpresa = res.data.tiposDePerfis.find(
+              (perfil: string) => (perfil === "EMPRESA") !== undefined
+            );
+
+            if (isEmpresa) {
+              navigate("/colaboradores");
+            }
+          });
       })
       .catch((err) => {
         console.log("🚀 ~ err:", err);
@@ -59,15 +73,12 @@ function MainPage() {
         </div>
         <div className="flex flex-col items-end">
           <p className="text-white">Já possui cadastro ?</p>
-          <Link
-            to={"/colaboradores"}
-            className="text-white font-black text-3xl underline"
+          <p
+            onClick={autenticar}
+            className="text-white font-black text-3xl underline cursor-pointer"
           >
             Entrar
-          </Link>
-          <button className="text-white" onClick={autenticar}>
-            Autenticar
-          </button>
+          </p>
         </div>
       </div>
     </div>

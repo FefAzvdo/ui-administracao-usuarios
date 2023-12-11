@@ -1,4 +1,4 @@
-import { Button, Modal, Table } from "flowbite-react";
+import { Button, Modal, Table, Tabs } from "flowbite-react";
 import MainLayout from "../components/MainLayout";
 import {
   formatarCPF,
@@ -13,12 +13,12 @@ import {
   setMaskNumeroCelular,
 } from "../utils";
 import { PlusCircle, Warning, MagnifyingGlass } from "@phosphor-icons/react";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import MaskedInput from "react-input-mask";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { mockColaboradores } from "./mock";
 import { ColaboratorType } from "../types";
 import { inputStyle, labelStyle } from "../styles";
+import { api } from "../api";
 
 type Inputs = {
   cpf: string;
@@ -31,9 +31,97 @@ type Inputs = {
   valorDeUsoDiario: string;
 };
 
+type ColaboratorTableType = {
+  type: "ATIVOS" | "INATIVOS";
+  activeColaborators: ColaboratorType[];
+  inactiveColaborators: ColaboratorType[];
+  onClickEditar: (colaborador: ColaboratorType) => void;
+  onClickActionButton: (colaborador: ColaboratorType) => void;
+};
+
+const ColaboratorTable = ({
+  type,
+  activeColaborators,
+  inactiveColaborators,
+  onClickEditar,
+  onClickActionButton,
+}: ColaboratorTableType) => {
+  const arrayColabs =
+    type === "ATIVOS" ? activeColaborators : inactiveColaborators;
+
+  return (
+    <div className="overflow-x-auto">
+      <Table>
+        <Table.Head>
+          <Table.HeadCell>Nome</Table.HeadCell>
+          <Table.HeadCell>CPF</Table.HeadCell>
+          <Table.HeadCell>E-mail</Table.HeadCell>
+          <Table.HeadCell>Telefone</Table.HeadCell>
+          <Table.HeadCell>Valor de uso diário</Table.HeadCell>
+          <Table.HeadCell>Possui primeira via ?</Table.HeadCell>
+          <Table.HeadCell>Ações</Table.HeadCell>
+        </Table.Head>
+        <Table.Body className="divide-y">
+          {arrayColabs.map((colaborador) => (
+            <Table.Row
+              className="bg-white dark:border-gray-700 dark:bg-gray-800 hover:bg-slate-100 font-semibold"
+              key={colaborador.numeroDocumento}
+            >
+              <Table.Cell>{colaborador.nome}</Table.Cell>
+              <Table.Cell>
+                {formatarCPF(colaborador.numeroDocumento)}
+              </Table.Cell>
+              <Table.Cell>{colaborador.email}</Table.Cell>
+              <Table.Cell>
+                {colaborador.telefone !== undefined
+                  ? formatarTelefone(colaborador.telefone)
+                  : ""}
+              </Table.Cell>
+              <Table.Cell>
+                {formatCurrencyToBRL(colaborador.valorUsoDiario)}
+              </Table.Cell>
+              <Table.Cell>{colaborador.nome ? "Não" : "Sim"}</Table.Cell>
+              <Table.Cell className="flex gap-3">
+                <a
+                  className="font-medium text-blue-600 dark:text-blue-500 hover:underline cursor-pointer"
+                  onClick={() => {
+                    onClickEditar(colaborador);
+                  }}
+                >
+                  Editar
+                </a>
+                {type === "ATIVOS" ? (
+                  <a
+                    className="font-medium text-red-600  hover:underline cursor-pointer"
+                    onClick={() => {
+                      onClickActionButton(colaborador);
+                    }}
+                  >
+                    Desassociar
+                  </a>
+                ) : (
+                  <a
+                    className="font-medium text-green-600  hover:underline cursor-pointer"
+                    onClick={() => {
+                      onClickActionButton(colaborador);
+                    }}
+                  >
+                    Associar
+                  </a>
+                )}
+              </Table.Cell>
+            </Table.Row>
+          ))}
+        </Table.Body>
+      </Table>
+    </div>
+  );
+};
+
 export default function ColaboradoresPage() {
   const [isModalOpened, setIsModalOpened] = useState(false);
-  const [isDesassocModalOpened, setIsDesassocModalOpened] = useState(false);
+  const [isAssocOrDesassocModalOpened, setIsAssocOrDesassocModalOpened] =
+    useState({ isOpened: false, type: "" });
   const [date, setDate] = useState("");
   const [valorDeUsoDiario, setValorDeUsoDiario] = useState("");
   const [modalType, setModalType] = useState("NOVO_COLABORADOR");
@@ -41,6 +129,31 @@ export default function ColaboradoresPage() {
     cpf: "",
     nome: "",
   });
+  const [activeColaborators, setActiveColaborators] = useState<
+    ColaboratorType[]
+  >([]);
+
+  const [inactiveColaborators, setInactiveColaborators] = useState<
+    ColaboratorType[]
+  >([]);
+
+  useEffect(() => {
+    const dadosEmpresaString = window.sessionStorage.getItem("DADOS_EMPRESA");
+
+    if (dadosEmpresaString !== null) {
+      const id = JSON.parse(dadosEmpresaString).codigo;
+
+      api
+        .get(`/cliente/favorecido/ativos/${id}`)
+        .then((res) => setActiveColaborators(res.data));
+
+      api
+        .get(`/cliente/favorecido/inativos/${id}`)
+        .then((res) => setInactiveColaborators(res.data));
+    } else {
+      console.log("ERRO POIS NÃO TEM NADA NO SESSION STORAGE");
+    }
+  }, []);
 
   const {
     register,
@@ -125,7 +238,7 @@ export default function ColaboradoresPage() {
 
   const closeAndCleanModal = () => {
     setIsModalOpened(false);
-    setIsDesassocModalOpened(false);
+    setIsAssocOrDesassocModalOpened({ isOpened: false, type: "" });
     clearErrors();
     setValue("cpf", "");
     setValue("nome", "");
@@ -190,7 +303,7 @@ export default function ColaboradoresPage() {
         </div>
       </div>
       <Modal
-        show={isDesassocModalOpened}
+        show={isAssocOrDesassocModalOpened.isOpened}
         size="sm"
         onClose={closeAndCleanModal}
         popup
@@ -203,15 +316,24 @@ export default function ColaboradoresPage() {
               className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200"
             />
             <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-              Tem certeza que deseja desassociar o(a) colaborador(a){" "}
-              {getValues("nome")} ?
+              Tem certeza que deseja{" "}
+              {isAssocOrDesassocModalOpened.type === "ATIVOS"
+                ? "desassociar"
+                : "associar"}{" "}
+              o(a) colaborador(a) {getValues("nome")} ?
             </h3>
             <div className="flex justify-center gap-4">
               <Button
-                color="failure"
+                color={
+                  isAssocOrDesassocModalOpened.type === "ATIVOS"
+                    ? "failure"
+                    : "success"
+                }
                 onClick={() => {
                   closeAndCleanModal();
-                  alert("CHAMAR API DESASSOCIAR COLABORADOR");
+                  isAssocOrDesassocModalOpened.type === "ATIVOS"
+                    ? alert("CHAMAR API DESASSOCIAR COLABORADOR")
+                    : alert("CHAMAR API ASSOCIAR COLABORADOR");
                 }}
               >
                 Sim, eu tenho
@@ -464,65 +586,46 @@ export default function ColaboradoresPage() {
           </Button>
         </Modal.Footer>
       </Modal>
-      <div className="overflow-x-auto">
-        <Table>
-          <Table.Head>
-            <Table.HeadCell>Nome</Table.HeadCell>
-            <Table.HeadCell>CPF</Table.HeadCell>
-            <Table.HeadCell>E-mail</Table.HeadCell>
-            <Table.HeadCell>Telefone</Table.HeadCell>
-            <Table.HeadCell>Valor de uso diário</Table.HeadCell>
-            <Table.HeadCell>Possui primeira via ?</Table.HeadCell>
-            <Table.HeadCell>Ações</Table.HeadCell>
-          </Table.Head>
-          <Table.Body className="divide-y">
-            {mockColaboradores.map((colaborador) => (
-              <Table.Row
-                className="bg-white dark:border-gray-700 dark:bg-gray-800 hover:bg-slate-100 font-semibold"
-                key={colaborador.numeroDocumento}
-              >
-                <Table.Cell>{colaborador.nome}</Table.Cell>
-                <Table.Cell>
-                  {formatarCPF(colaborador.numeroDocumento)}
-                </Table.Cell>
-                <Table.Cell>{colaborador.email}</Table.Cell>
-                <Table.Cell>
-                  {colaborador.telefone !== undefined
-                    ? formatarTelefone(colaborador.telefone)
-                    : ""}
-                </Table.Cell>
-                <Table.Cell>
-                  {formatCurrencyToBRL(colaborador.valorUsoDiario)}
-                </Table.Cell>
-                <Table.Cell>{colaborador.nome ? "Não" : "Sim"}</Table.Cell>
-                <Table.Cell className="flex gap-3">
-                  <a
-                    className="font-medium text-blue-600 dark:text-blue-500 hover:underline cursor-pointer"
-                    onClick={() => {
-                      setModalType("EDITAR");
-                      setIsModalOpened(true);
-                      //@ts-expect-error mock
-                      setColaboratorValues(colaborador);
-                    }}
-                  >
-                    Editar
-                  </a>
-                  <a
-                    className="font-medium text-red-600 dark:text-red-500 hover:underline cursor-pointer"
-                    onClick={() => {
-                      setIsDesassocModalOpened(true);
-                      //@ts-expect-error mock
-                      setColaboratorValues(colaborador);
-                    }}
-                  >
-                    Desassociar
-                  </a>
-                </Table.Cell>
-              </Table.Row>
-            ))}
-          </Table.Body>
-        </Table>
-      </div>
+      <Tabs>
+        <Tabs.Item title="Ativos">
+          <ColaboratorTable
+            type="ATIVOS"
+            activeColaborators={activeColaborators}
+            inactiveColaborators={inactiveColaborators}
+            onClickEditar={(colaborador: ColaboratorType) => {
+              setModalType("EDITAR");
+              setIsModalOpened(true);
+              setColaboratorValues(colaborador);
+            }}
+            onClickActionButton={(colaborador) => {
+              setIsAssocOrDesassocModalOpened({
+                isOpened: true,
+                type: "ATIVOS",
+              });
+              setColaboratorValues(colaborador);
+            }}
+          />
+        </Tabs.Item>
+        <Tabs.Item title="Inativos">
+          <ColaboratorTable
+            type="INATIVOS"
+            activeColaborators={activeColaborators}
+            inactiveColaborators={inactiveColaborators}
+            onClickEditar={(colaborador: ColaboratorType) => {
+              setModalType("EDITAR");
+              setIsModalOpened(true);
+              setColaboratorValues(colaborador);
+            }}
+            onClickActionButton={(colaborador) => {
+              setIsAssocOrDesassocModalOpened({
+                isOpened: true,
+                type: "INATIVOS",
+              });
+              setColaboratorValues(colaborador);
+            }}
+          />
+        </Tabs.Item>
+      </Tabs>
     </MainLayout>
   );
 }
