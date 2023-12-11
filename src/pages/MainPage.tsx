@@ -1,9 +1,6 @@
 import axios from "axios";
 import banner from "../assets/mulher-rh.jpg";
 import { Link } from "react-router-dom";
-import Cookies from "universal-cookie";
-
-const cookies = new Cookies(null, { path: "/" });
 
 function MainPage() {
   function autenticar() {
@@ -11,7 +8,7 @@ function MainPage() {
       .post(
         `https://api.dev.billingpay.com.br/autenticacao`,
         {
-          senha: "#Trocar123",
+          senha: "#Trocar1234",
           usuario: "15355251773",
         },
         {
@@ -21,7 +18,10 @@ function MainPage() {
         }
       )
       .then((res) => {
-        cookies.set("TOKEN", res.data.token);
+        window.sessionStorage.setItem("TOKEN", res.data.token);
+      })
+      .catch((err) => {
+        console.log("🚀 ~ err:", err);
       });
   }
 
