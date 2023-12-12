@@ -1,6 +1,6 @@
 import MainLayout from "../components/MainLayout";
-import { Table, Button, Modal, Datepicker } from "flowbite-react";
-import { mockPedido, mockStatusPedido } from "./mock";
+import { Table, Button, Modal, Datepicker, Spinner } from "flowbite-react";
+import { mockStatusPedido } from "./mock";
 import {
   Check,
   CopySimple,
@@ -19,10 +19,13 @@ import {
   formatDateFromYYYY_MM_DD_To_DD_MM_YYYY,
   formatCurrencyToBRL,
   getCurrentStatusPedido,
+  formatDateFromDD_MM_YYYY_To_YYYY_MM_DD,
 } from "../utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PedidoType } from "../types";
 import { inputStyle, labelStyle } from "../styles";
+import { dadosEmpresa } from "../storage";
+import { api } from "../api";
 
 export default function PedidosPage_VerPedido() {
   const navigate = useNavigate();
@@ -30,10 +33,50 @@ export default function PedidosPage_VerPedido() {
   const [pedidoSelecionado, setPedidoSelecionado] = useState<PedidoType>();
   const [inputSearch, setInputSearch] = useState({
     numeroPedido: "",
-    statusPedido: "AGUARDANDO_PAGAMENTO",
+    statusPedido: "",
     periodoDe: new Date(),
     periodoAte: new Date(),
   });
+  const [pedidos, setPedidos] = useState<PedidoType[]>([]);
+  const [isLoadingPedidos, setIsLoadingPedidos] = useState(false);
+
+  const codigoEmpresa = dadosEmpresa.codigo;
+
+  function fetchDataTodosOsPedidos() {
+    setIsLoadingPedidos(true);
+
+    const body = {
+      dataPagamento: false,
+      idCliente: codigoEmpresa,
+      numeroDocumento: "",
+      numeroPedido: inputSearch.numeroPedido,
+      periodo: {
+        de:
+          formatDateFromDD_MM_YYYY_To_YYYY_MM_DD(
+            inputSearch.periodoDe.toLocaleDateString()
+          ) + "T00:00:00",
+        ate:
+          formatDateFromDD_MM_YYYY_To_YYYY_MM_DD(
+            inputSearch.periodoAte.toLocaleDateString()
+          ) + "T23:59:59",
+      },
+      status: inputSearch.statusPedido,
+    };
+
+    api
+      .post(`/pedido/params`, body)
+      .then((res) => {
+        setPedidos(res.data);
+      })
+      .catch((err) => console.log(err))
+      .finally(() => {
+        setIsLoadingPedidos(false);
+      });
+  }
+
+  useEffect(() => {
+    fetchDataTodosOsPedidos();
+  }, []);
 
   function handleClickEditarPedido(pedidoSelecionado: PedidoType) {
     navigate("/novo-pedido", {
@@ -128,6 +171,7 @@ export default function PedidosPage_VerPedido() {
                 labelClearButton="Limpar"
                 value={new Date(inputSearch.periodoAte).toLocaleDateString()}
                 onSelectedDateChanged={(date) => {
+                  console.log("🚀 ~ date:", date);
                   setInputSearch({
                     ...inputSearch,
                     periodoAte: date,
@@ -135,7 +179,7 @@ export default function PedidosPage_VerPedido() {
                 }}
               />
             </div>
-            <Button className="mt-2" onClick={() => console.log(inputSearch)}>
+            <Button className="mt-2" onClick={fetchDataTodosOsPedidos}>
               <MagnifyingGlass size={20} className="mx-2" /> Buscar
             </Button>
           </div>
@@ -233,55 +277,66 @@ export default function PedidosPage_VerPedido() {
         </Modal.Body>
       </Modal>
       <div className="overflow-x-auto">
-        <Table hoverable>
-          <Table.Head>
-            <Table.HeadCell className="text-center">Pedido</Table.HeadCell>
-            <Table.HeadCell>Dt pedido</Table.HeadCell>
-            <Table.HeadCell>Valor Pedido</Table.HeadCell>
-            <Table.HeadCell>Status</Table.HeadCell>
-            <Table.HeadCell>Valor Pago</Table.HeadCell>
-            <Table.HeadCell>Dt. Pagamento</Table.HeadCell>
-            <Table.HeadCell>Ações</Table.HeadCell>
-          </Table.Head>
-          <Table.Body className="divide-y">
-            {mockPedido.map((pedido) => (
-              <Table.Row key={pedido.numero} className="font-semibold">
-                <Table.Cell className="text-center">{pedido.numero}</Table.Cell>
-                <Table.Cell>
-                  {formatDateFromYYYY_MM_DD_To_DD_MM_YYYY(pedido.dataInclusao)}
-                </Table.Cell>
-                <Table.Cell>
-                  {formatCurrencyToBRL(pedido.valorCalculadoPedido)}
-                </Table.Cell>
-                <Table.Cell
-                  className={`${
-                    getCurrentStatusPedido(pedido.statusPedido)?.color
-                  }`}
-                >
-                  {getCurrentStatusPedido(pedido.statusPedido)?.label}
-                </Table.Cell>
-                <Table.Cell>{formatCurrencyToBRL(pedido.valorPago)}</Table.Cell>
-                <Table.Cell>
-                  {formatDateFromYYYY_MM_DD_To_DD_MM_YYYY(
-                    pedido.dataPagamento ?? ""
-                  )}
-                </Table.Cell>
-                <Table.Cell>
-                  <a
-                    className="font-medium text-blue-600 dark:text-blue-500 hover:underline cursor-pointer"
-                    onClick={() => {
-                      setIsModalOpened(true);
-                      //@ts-expect-error mock
-                      setPedidoSelecionado(pedido);
-                    }}
+        {isLoadingPedidos ? (
+          <div className="flex items-center justify-center h-72">
+            <Spinner />
+          </div>
+        ) : (
+          <Table hoverable>
+            <Table.Head>
+              <Table.HeadCell className="text-center">Pedido</Table.HeadCell>
+              <Table.HeadCell>Dt pedido</Table.HeadCell>
+              <Table.HeadCell>Valor Pedido</Table.HeadCell>
+              <Table.HeadCell>Status</Table.HeadCell>
+              <Table.HeadCell>Valor Pago</Table.HeadCell>
+              <Table.HeadCell>Dt. Pagamento</Table.HeadCell>
+              <Table.HeadCell>Ações</Table.HeadCell>
+            </Table.Head>
+            <Table.Body className="divide-y">
+              {pedidos.map((pedido) => (
+                <Table.Row key={pedido.numero} className="font-semibold">
+                  <Table.Cell className="text-center">
+                    {pedido.numero}
+                  </Table.Cell>
+                  <Table.Cell>
+                    {formatDateFromYYYY_MM_DD_To_DD_MM_YYYY(
+                      pedido.dataInclusao
+                    )}
+                  </Table.Cell>
+                  <Table.Cell>
+                    {formatCurrencyToBRL(pedido.valorCalculadoPedido)}
+                  </Table.Cell>
+                  <Table.Cell
+                    className={`${
+                      getCurrentStatusPedido(pedido.statusPedido)?.color
+                    }`}
                   >
-                    Ações
-                  </a>
-                </Table.Cell>
-              </Table.Row>
-            ))}
-          </Table.Body>
-        </Table>
+                    {getCurrentStatusPedido(pedido.statusPedido)?.label}
+                  </Table.Cell>
+                  <Table.Cell>
+                    {formatCurrencyToBRL(pedido.valorPago)}
+                  </Table.Cell>
+                  <Table.Cell>
+                    {formatDateFromYYYY_MM_DD_To_DD_MM_YYYY(
+                      pedido.dataPagamento ?? ""
+                    )}
+                  </Table.Cell>
+                  <Table.Cell>
+                    <a
+                      className="font-medium text-blue-600 dark:text-blue-500 hover:underline cursor-pointer"
+                      onClick={() => {
+                        setIsModalOpened(true);
+                        setPedidoSelecionado(pedido);
+                      }}
+                    >
+                      Ações
+                    </a>
+                  </Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table>
+        )}
       </div>
     </MainLayout>
   );

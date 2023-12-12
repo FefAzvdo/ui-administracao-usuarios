@@ -1232,6 +1232,11 @@ export const mockPedido = [
 
 export const mockStatusPedido = [
   {
+    label: "Todos",
+    value: "",
+    color: "text-gray-500",
+  },
+  {
     label: "Aguardando pagamento",
     value: "AGUARDANDO_PAGAMENTO",
     color: "text-yellow-500",

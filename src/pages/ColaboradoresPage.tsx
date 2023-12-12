@@ -61,17 +61,24 @@ export default function ColaboradoresPage() {
   const [inactiveColaborators, setInactiveColaborators] = useState<
     ColaboratorType[]
   >([]);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
 
   const codigoEmpresa = dadosEmpresa.codigo;
 
   const fetchDataColaboradores = () => {
+    setIsSearchLoading(true);
+
     api
       .get(`/cliente/favorecido/ativos/${codigoEmpresa}`)
-      .then((res) => setActiveColaborators(res.data));
+      .then((res) => setActiveColaborators(res.data))
+      .catch((err) => console.log(err))
+      .finally(() => setIsSearchLoading(false));
 
     api
       .get(`/cliente/favorecido/inativos/${codigoEmpresa}`)
-      .then((res) => setInactiveColaborators(res.data));
+      .then((res) => setInactiveColaborators(res.data))
+      .catch((err) => console.log(err))
+      .finally(() => setIsSearchLoading(false));
   };
 
   useEffect(() => {
@@ -179,6 +186,8 @@ export default function ColaboradoresPage() {
   };
 
   const buscarColaborador = () => {
+    setIsSearchLoading(true);
+
     let url = "";
     const cpf = onlyNumbers(inputSearch.cpf);
 
@@ -190,7 +199,11 @@ export default function ColaboradoresPage() {
       url = `/cliente/${codigoEmpresa}/favorecidos?cpf=${cpf}&nome=${inputSearch.nome}&idProduto=2`;
     }
 
-    api.get(url).then((res) => setActiveColaborators(res.data));
+    api
+      .get(url)
+      .then((res) => setActiveColaborators(res.data))
+      .catch((err) => console.log(err))
+      .finally(() => setIsSearchLoading(false));
   };
 
   const limparColaboradores = () => {
@@ -199,9 +212,13 @@ export default function ColaboradoresPage() {
       nome: "",
     });
 
+    setIsSearchLoading(true);
+
     api
       .get(`/cliente/favorecido/ativos/${codigoEmpresa}`)
-      .then((res) => setActiveColaborators(res.data));
+      .then((res) => setActiveColaborators(res.data))
+      .catch((err) => console.log(err))
+      .finally(() => setIsSearchLoading(false));
   };
 
   const handleClickCriarColaborador = (inputs: Inputs) => {
@@ -649,6 +666,7 @@ export default function ColaboradoresPage() {
         <Tabs>
           <Tabs.Item title="Ativos">
             <ColaboratorTable
+              isLoading={isSearchLoading}
               type="ATIVOS"
               activeColaborators={activeColaborators}
               inactiveColaborators={inactiveColaborators}
@@ -663,12 +681,12 @@ export default function ColaboradoresPage() {
                   type: "ATIVOS",
                 });
                 setColaboratorValues(colaborador);
-                console.log(">>>>>>>>>>", colaborador);
               }}
             />
           </Tabs.Item>
           <Tabs.Item title="Inativos">
             <ColaboratorTable
+              isLoading={isSearchLoading}
               type="INATIVOS"
               activeColaborators={activeColaborators}
               inactiveColaborators={inactiveColaborators}
