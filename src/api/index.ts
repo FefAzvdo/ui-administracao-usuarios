@@ -1,4 +1,5 @@
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import { token } from "../storage";
 
 export const baseUrl = () => {
   return window.config.baseUrl;
@@ -17,7 +18,7 @@ api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Faça algo antes de enviar a solicitação, como adicionar cabeçalhos personalizados
     // console.log("Request Interceptor:", config);
-    config.headers["Authorization"] = window.sessionStorage.getItem("TOKEN");
+    config.headers["Authorization"] = token;
     return config;
   },
   (error) => {

@@ -9,15 +9,22 @@ import {
   onlyNumbers,
   formatDateFromYYYY_MM_DD_to_MMToDD_MM_YYYY,
   setMaskNumeroCelular,
+  formatCurrencyBrlToFloat,
 } from "../utils";
-import { PlusCircle, Warning, MagnifyingGlass } from "@phosphor-icons/react";
+import {
+  PlusCircle,
+  Warning,
+  MagnifyingGlass,
+  Broom,
+} from "@phosphor-icons/react";
 import { ChangeEvent, useEffect, useState } from "react";
 import MaskedInput from "react-input-mask";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { ColaboratorType } from "../types";
+import { ColaboratorType, RequestNovoColaborador } from "../types";
 import { inputStyle, labelStyle } from "../styles";
-import { api, baseUrl } from "../api";
+import { api } from "../api";
 import { ColaboratorTable } from "../components/ColaboratorTable";
+import { dadosEmpresa } from "../storage";
 
 type Inputs = {
   cpf: string;
@@ -49,23 +56,17 @@ export default function ColaboradoresPage() {
     ColaboratorType[]
   >([]);
 
+  const codigoEmpresa = dadosEmpresa.codigo;
+
   useEffect(() => {
-    const dadosEmpresaString = window.sessionStorage.getItem("DADOS_EMPRESA");
+    api
+      .get(`/cliente/favorecido/ativos/${codigoEmpresa}`)
+      .then((res) => setActiveColaborators(res.data));
 
-    if (dadosEmpresaString !== null) {
-      const id = JSON.parse(dadosEmpresaString).codigo;
-
-      api
-        .get(`/cliente/favorecido/ativos/${id}`)
-        .then((res) => setActiveColaborators(res.data));
-
-      api
-        .get(`/cliente/favorecido/inativos/${id}`)
-        .then((res) => setInactiveColaborators(res.data));
-    } else {
-      console.log("ERRO POIS NÃO TEM NADA NO SESSION STORAGE");
-    }
-  }, []);
+    api
+      .get(`/cliente/favorecido/inativos/${codigoEmpresa}`)
+      .then((res) => setInactiveColaborators(res.data));
+  }, [codigoEmpresa]);
 
   const {
     register,
@@ -79,9 +80,9 @@ export default function ColaboradoresPage() {
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     console.log("🚀 ~ data:", data);
     if (modalType === "NOVO_COLABORADOR") {
-      alert("CRIAR COLABORADOR");
+      handleCriarOuEditarColaboradorColaborador(true, data);
     } else {
-      alert("EDITAR COLABORADOR");
+      handleCriarOuEditarColaboradorColaborador(false, data);
     }
   };
 
@@ -128,7 +129,11 @@ export default function ColaboradoresPage() {
     const inputValue = event.target.value;
     const valorFormatado = formatarValorInputParaMoedaBRL(inputValue);
 
-    setValorDeUsoDiario(valorFormatado);
+    if (valorFormatado === "R$ NaN") {
+      setValorDeUsoDiario("R$ 0,00");
+    } else {
+      setValorDeUsoDiario(valorFormatado);
+    }
   };
 
   const setColaboratorValues = (colaborador: ColaboratorType) => {
@@ -160,6 +165,61 @@ export default function ColaboradoresPage() {
     setValue("celular", "");
     setValue("email", "");
     setValue("valorDeUsoDiario", "");
+  };
+
+  const buscarColaborador = () => {
+    let url = "";
+    const cpf = onlyNumbers(inputSearch.cpf);
+
+    if (inputSearch.nome !== "" && inputSearch.cpf === "") {
+      url = `/cliente/${codigoEmpresa}/favorecidos?nome=${inputSearch.nome}&idProduto=2`;
+    } else if (inputSearch.cpf !== "" && inputSearch.nome === "") {
+      url = `/cliente/${codigoEmpresa}/favorecidos?cpf=${cpf}&idProduto=2`;
+    } else {
+      url = `/cliente/${codigoEmpresa}/favorecidos?cpf=${cpf}&nome=${inputSearch.nome}&idProduto=2`;
+    }
+
+    api.get(url).then((res) => setActiveColaborators(res.data));
+  };
+
+  const limparColaboradores = () => {
+    setInputSearch({
+      cpf: "",
+      nome: "",
+    });
+
+    api
+      .get(`/cliente/favorecido/ativos/${codigoEmpresa}`)
+      .then((res) => setActiveColaborators(res.data));
+  };
+
+  const handleCriarOuEditarColaboradorColaborador = (
+    isCreating: boolean,
+    inputs: Inputs
+  ) => {
+    const body: RequestNovoColaborador = {
+      matricula: inputs.numeroMatricula,
+      idClientePrincipal: dadosEmpresa.codigo,
+      colaborador: {
+        email: inputs.email,
+        sexo: inputs.sexo,
+        numeroDocumento: inputs.cpf,
+        nome: inputs.nome,
+        tipoDocumento: "CPF",
+        canalCadastro: "SITE_PJ",
+        idTiposPerfisCliente: [2],
+        idClienteFavorecido: 0,
+        telefone: inputs.celular,
+        dataNascimento: inputs.dataNascimento,
+      },
+      valorUsoDiario: formatCurrencyBrlToFloat(inputs.valorDeUsoDiario),
+    };
+
+    console.log("🚀 ~ body:", body);
+
+    // if (isCreating) {
+    //   api.post(`/cliente/pessoa-juridica/colaborador`);
+    // }
   };
 
   return (
@@ -198,15 +258,14 @@ export default function ColaboradoresPage() {
               }
             />
           </div>
-          <Button
-            className="mt-2"
-            onClick={() => {
-              console.log(inputSearch);
-              console.log(baseUrl());
-            }}
-          >
-            <MagnifyingGlass size={20} className="mx-2" /> Buscar
-          </Button>
+          <div className="flex ">
+            <Button className="mt-2 mr-2" onClick={buscarColaborador}>
+              <MagnifyingGlass size={20} className="mx-2" /> Buscar
+            </Button>
+            <Button className="mt-2" onClick={limparColaboradores}>
+              <Broom size={20} className="mx-2" /> Limpar
+            </Button>
+          </div>
         </div>
         <div className="flex justify-end w-full md:max-w-xs">
           <Button
@@ -376,9 +435,9 @@ export default function ColaboradoresPage() {
                     {...register("dataNascimento", {
                       required: { value: true, message: "Campo obrigatório" },
                       validate: (data) => isDateDD_MM_YYYY_Valid(data),
-                      onChange: (e) => handleDateChange(e),
-                      value: date,
                     })}
+                    value={date}
+                    onChange={(e) => handleDateChange(e)}
                     className={inputStyle}
                   />
                   {errors.dataNascimento && (
@@ -482,9 +541,9 @@ export default function ColaboradoresPage() {
                     id="valorDeUsoDiario"
                     {...register("valorDeUsoDiario", {
                       required: { value: true, message: "Campo obrigatório" },
-                      onChange: handleChangeValorUsoDiario,
-                      value: valorDeUsoDiario,
                     })}
+                    onChange={handleChangeValorUsoDiario}
+                    value={valorDeUsoDiario}
                     className={inputStyle}
                   />
                   {errors.valorDeUsoDiario && (

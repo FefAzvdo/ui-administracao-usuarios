@@ -154,3 +154,23 @@ export type EnderecoType = {
   tipoEndereco: string;
   tipoLogradouro: string;
 };
+
+export type RequestNovoColaborador = {
+  matricula: string;
+  idClientePrincipal: number;
+  colaborador: Colaborador;
+  valorUsoDiario: number;
+};
+
+type Colaborador = {
+  email: string;
+  sexo: string;
+  numeroDocumento: string;
+  nome: string;
+  tipoDocumento: string;
+  canalCadastro: string;
+  idTiposPerfisCliente: number[];
+  idClienteFavorecido: number;
+  telefone: string;
+  dataNascimento: string;
+};
