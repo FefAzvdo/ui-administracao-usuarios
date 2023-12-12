@@ -9,7 +9,7 @@ export const loginUrl = () => {
 };
 
 export const api = axios.create({
-  baseURL: "https://api.dev.billingpay.com.br",
+  baseURL: baseUrl(),
 });
 
 // Adicione um interceptor de solicitação

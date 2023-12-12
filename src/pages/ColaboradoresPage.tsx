@@ -16,7 +16,7 @@ import MaskedInput from "react-input-mask";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { ColaboratorType } from "../types";
 import { inputStyle, labelStyle } from "../styles";
-import { api } from "../api";
+import { api, baseUrl } from "../api";
 import { ColaboratorTable } from "../components/ColaboratorTable";
 
 type Inputs = {
@@ -198,7 +198,13 @@ export default function ColaboradoresPage() {
               }
             />
           </div>
-          <Button className="mt-2" onClick={() => console.log(inputSearch)}>
+          <Button
+            className="mt-2"
+            onClick={() => {
+              console.log(inputSearch);
+              console.log(baseUrl());
+            }}
+          >
             <MagnifyingGlass size={20} className="mx-2" /> Buscar
           </Button>
         </div>

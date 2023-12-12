@@ -1,4 +1,3 @@
-import axios from "axios";
 import banner from "../assets/mulher-rh.jpg";
 import { Link, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
@@ -8,8 +7,8 @@ function MainPage() {
   const navigate = useNavigate();
 
   async function autenticar() {
-    axios
-      .post(`https://api.dev.billingpay.com.br/autenticacao`, {
+    api
+      .post(`/autenticacao`, {
         senha: "#Trocar123",
         usuario: "21369699000131",
       })
@@ -23,24 +22,20 @@ function MainPage() {
           JSON.stringify(decodedToken)
         );
 
-        api
-          .get(
-            `https://api.dev.billingpay.com.br/cliente/conta-acesso/${decodedToken.jti}`
-          )
-          .then((res) => {
-            window.sessionStorage.setItem(
-              "DADOS_EMPRESA",
-              JSON.stringify(res.data)
-            );
+        api.get(`/cliente/conta-acesso/${decodedToken.jti}`).then((res) => {
+          window.sessionStorage.setItem(
+            "DADOS_EMPRESA",
+            JSON.stringify(res.data)
+          );
 
-            const isEmpresa = res.data.tiposDePerfis.find(
-              (perfil: string) => (perfil === "EMPRESA") !== undefined
-            );
+          const isEmpresa = res.data.tiposDePerfis.find(
+            (perfil: string) => (perfil === "EMPRESA") !== undefined
+          );
 
-            if (isEmpresa) {
-              navigate("/colaboradores");
-            }
-          });
+          if (isEmpresa) {
+            navigate("/colaboradores");
+          }
+        });
       })
       .catch((err) => {
         console.log("🚀 ~ err:", err);
