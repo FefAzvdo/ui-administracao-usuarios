@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ItensPedidoType, PedidoType } from "../types";
 import {
   formatCurrencyToBRL,
-  formatDateFromYYYY_MM_DD_to_MMToDD_MM_YYYY,
+  formatDateFromYYYY_MM_DD_To_DD_MM_YYYY,
   getCurrentStatusPedido,
 } from "../utils";
 import InfoPedido from "../components/InfoPedido";
@@ -39,9 +39,7 @@ export default function PedidoPage_DetalhePedido() {
       <div className="flex justify-between w-full">
         <InfoPedido
           label="Data do pedido: "
-          value={formatDateFromYYYY_MM_DD_to_MMToDD_MM_YYYY(
-            pedido?.dataInclusao
-          )}
+          value={formatDateFromYYYY_MM_DD_To_DD_MM_YYYY(pedido?.dataInclusao)}
         />
         <InfoPedido
           label="Status do pedido: "

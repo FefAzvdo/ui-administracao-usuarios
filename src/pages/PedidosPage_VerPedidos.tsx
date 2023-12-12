@@ -16,7 +16,7 @@ import {
 
 import { useNavigate } from "react-router-dom";
 import {
-  formatDateFromYYYY_MM_DD_to_MMToDD_MM_YYYY,
+  formatDateFromYYYY_MM_DD_To_DD_MM_YYYY,
   formatCurrencyToBRL,
   getCurrentStatusPedido,
 } from "../utils";
@@ -248,9 +248,7 @@ export default function PedidosPage_VerPedido() {
               <Table.Row key={pedido.numero} className="font-semibold">
                 <Table.Cell className="text-center">{pedido.numero}</Table.Cell>
                 <Table.Cell>
-                  {formatDateFromYYYY_MM_DD_to_MMToDD_MM_YYYY(
-                    pedido.dataInclusao
-                  )}
+                  {formatDateFromYYYY_MM_DD_To_DD_MM_YYYY(pedido.dataInclusao)}
                 </Table.Cell>
                 <Table.Cell>
                   {formatCurrencyToBRL(pedido.valorCalculadoPedido)}
@@ -264,7 +262,7 @@ export default function PedidosPage_VerPedido() {
                 </Table.Cell>
                 <Table.Cell>{formatCurrencyToBRL(pedido.valorPago)}</Table.Cell>
                 <Table.Cell>
-                  {formatDateFromYYYY_MM_DD_to_MMToDD_MM_YYYY(
+                  {formatDateFromYYYY_MM_DD_To_DD_MM_YYYY(
                     pedido.dataPagamento ?? ""
                   )}
                 </Table.Cell>

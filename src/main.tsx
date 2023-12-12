@@ -1,9 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
+import "./index.css";
+import "react-toastify/dist/ReactToastify.css";
+
 import MainPage from "./pages/MainPage.tsx";
 import CadsatroPage_01 from "./pages/CadastroPage_01.tsx";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import "./index.css";
 import CadsatroPage_02 from "./pages/CadastroPage_02.tsx";
 import CadsatroPage_03 from "./pages/CadastroPage_03.tsx";
 import ColaboradoresPage from "./pages/ColaboradoresPage.tsx";

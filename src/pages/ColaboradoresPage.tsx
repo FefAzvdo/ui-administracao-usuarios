@@ -7,9 +7,10 @@ import {
   isDateDD_MM_YYYY_Valid,
   isEmailValid,
   onlyNumbers,
-  formatDateFromYYYY_MM_DD_to_MMToDD_MM_YYYY,
+  formatDateFromYYYY_MM_DD_To_DD_MM_YYYY,
   setMaskNumeroCelular,
   formatCurrencyBrlToFloat,
+  formatDateFromDD_MM_YYYY_To_YYYY_MM_DD,
 } from "../utils";
 import {
   PlusCircle,
@@ -20,12 +21,16 @@ import {
 import { ChangeEvent, useEffect, useState } from "react";
 import MaskedInput from "react-input-mask";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { ColaboratorType, RequestNovoColaborador } from "../types";
+import {
+  ColaboratorType,
+  RequestEditarColaborador,
+  RequestNovoColaborador,
+} from "../types";
 import { inputStyle, labelStyle } from "../styles";
 import { api } from "../api";
 import { ColaboratorTable } from "../components/ColaboratorTable";
 import { dadosEmpresa } from "../storage";
-
+import { ToastContainer, toast } from "react-toastify";
 type Inputs = {
   cpf: string;
   nome: string;
@@ -35,6 +40,7 @@ type Inputs = {
   celular: string;
   email: string;
   valorDeUsoDiario: string;
+  idClienteFavorecido: number;
 };
 
 export default function ColaboradoresPage() {
@@ -58,7 +64,7 @@ export default function ColaboradoresPage() {
 
   const codigoEmpresa = dadosEmpresa.codigo;
 
-  useEffect(() => {
+  const fetchDataColaboradores = () => {
     api
       .get(`/cliente/favorecido/ativos/${codigoEmpresa}`)
       .then((res) => setActiveColaborators(res.data));
@@ -66,7 +72,11 @@ export default function ColaboradoresPage() {
     api
       .get(`/cliente/favorecido/inativos/${codigoEmpresa}`)
       .then((res) => setInactiveColaborators(res.data));
-  }, [codigoEmpresa]);
+  };
+
+  useEffect(() => {
+    fetchDataColaboradores();
+  }, []);
 
   const {
     register,
@@ -78,11 +88,10 @@ export default function ColaboradoresPage() {
   } = useForm<Inputs>();
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
-    console.log("🚀 ~ data:", data);
     if (modalType === "NOVO_COLABORADOR") {
-      handleCriarOuEditarColaboradorColaborador(true, data);
+      handleClickCriarColaborador(data);
     } else {
-      handleCriarOuEditarColaboradorColaborador(false, data);
+      handleClickEditarColaborador(data);
     }
   };
 
@@ -142,7 +151,7 @@ export default function ColaboradoresPage() {
     setValue("numeroMatricula", colaborador.matricula);
     setValue(
       "dataNascimento",
-      formatDateFromYYYY_MM_DD_to_MMToDD_MM_YYYY(colaborador.dataNascimento)
+      formatDateFromYYYY_MM_DD_To_DD_MM_YYYY(colaborador.dataNascimento)
     );
     setValue("sexo", colaborador.sexo);
     setValue("celular", setMaskNumeroCelular(colaborador.telefone));
@@ -151,6 +160,7 @@ export default function ColaboradoresPage() {
       "valorDeUsoDiario",
       formatCurrencyToBRL(colaborador.valorUsoDiario)
     );
+    setValue("idClienteFavorecido", colaborador.idClienteFavorecido);
   };
 
   const closeAndCleanModal = () => {
@@ -165,6 +175,7 @@ export default function ColaboradoresPage() {
     setValue("celular", "");
     setValue("email", "");
     setValue("valorDeUsoDiario", "");
+    setValue("idClienteFavorecido", 0);
   };
 
   const buscarColaborador = () => {
@@ -193,416 +204,490 @@ export default function ColaboradoresPage() {
       .then((res) => setActiveColaborators(res.data));
   };
 
-  const handleCriarOuEditarColaboradorColaborador = (
-    isCreating: boolean,
-    inputs: Inputs
-  ) => {
-    const body: RequestNovoColaborador = {
+  const handleClickCriarColaborador = (inputs: Inputs) => {
+    const bodyNovoColab: RequestNovoColaborador = {
       matricula: inputs.numeroMatricula,
-      idClientePrincipal: dadosEmpresa.codigo,
+      idClientePrincipal: codigoEmpresa,
       colaborador: {
         email: inputs.email,
         sexo: inputs.sexo,
-        numeroDocumento: inputs.cpf,
+        numeroDocumento: onlyNumbers(inputs.cpf),
         nome: inputs.nome,
         tipoDocumento: "CPF",
         canalCadastro: "SITE_PJ",
         idTiposPerfisCliente: [2],
         idClienteFavorecido: 0,
-        telefone: inputs.celular,
-        dataNascimento: inputs.dataNascimento,
+        telefone: onlyNumbers(inputs.celular),
+        dataNascimento: formatDateFromDD_MM_YYYY_To_YYYY_MM_DD(
+          inputs.dataNascimento
+        ),
       },
       valorUsoDiario: formatCurrencyBrlToFloat(inputs.valorDeUsoDiario),
     };
 
-    console.log("🚀 ~ body:", body);
+    api
+      .post(`/cliente/pessoa-juridica/colaborador`, bodyNovoColab)
+      .then(() => {
+        toast.success("Colaborador criado com sucesso", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      })
+      .catch(() => {
+        toast.error("Erro ao criar colaborador", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      })
+      .finally(() => {
+        closeAndCleanModal();
+      });
+  };
 
-    // if (isCreating) {
-    //   api.post(`/cliente/pessoa-juridica/colaborador`);
-    // }
+  const handleClickEditarColaborador = (inputs: Inputs) => {
+    const bodyEditarColab: RequestEditarColaborador = {
+      nome: inputs.nome,
+      matricula: inputs.numeroMatricula,
+      email: inputs.email,
+      sexo: inputs.sexo,
+      dataNascimento: formatDateFromDD_MM_YYYY_To_YYYY_MM_DD(
+        inputs.dataNascimento
+      ),
+      telefone: onlyNumbers(inputs.celular),
+      valorUsoDiario: formatCurrencyBrlToFloat(inputs.valorDeUsoDiario),
+      numeroDocumento: onlyNumbers(inputs.cpf),
+      idClientePrincipal: codigoEmpresa,
+      idClienteFavorecido: getValues("idClienteFavorecido"),
+    };
+
+    api
+      .put(`/cliente/pessoa-juridica/colaborador`, bodyEditarColab)
+      .then(() => {
+        toast.success("Colaborador editado com sucesso", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      })
+      .catch(() => {
+        toast.error("Erro ao editar colaborador", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      })
+      .finally(() => {
+        closeAndCleanModal();
+      });
+  };
+
+  const handleClickDesassociarOuAssociarColaborador = (
+    isDesativando: boolean
+  ) => {
+    const body = {
+      idClienteFavorecido: getValues("idClienteFavorecido"),
+      idClientePrincipal: codigoEmpresa,
+    };
+
+    const type = isDesativando ? "inativar" : "reativar";
+    const word = isDesativando ? "desassociado" : "ativado";
+
+    api
+      .put(`/cliente/favorecido/${type}`, body)
+      .then(() => {
+        toast.success(`Colaborador ${word} com sucesso`, {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      })
+      .catch(() => {
+        toast.error("Erro ao desassociar colaborador", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      })
+      .finally(() => {
+        closeAndCleanModal();
+        fetchDataColaboradores();
+      });
   };
 
   return (
-    <MainLayout pageTitle="Colaboradores">
-      <div className="flex justify-between md:items-end py-4 flex-col md:flex-row">
-        <div className="flex gap-4 w-full md:max-w-3xl flex-col md:flex-row md:items-end">
-          <div className="flex flex-col md:w-1/2">
-            <label htmlFor="cpfBusca" className={labelStyle}>
-              CPF
-            </label>
-            <MaskedInput
-              id="cpfBusca"
-              mask={"999.999.999-99"}
-              placeholder="000.000.000-00"
-              alwaysShowMask={false}
-              type={"text"}
-              className={inputStyle}
-              value={inputSearch.cpf}
-              onChange={(e) =>
-                setInputSearch({ ...inputSearch, cpf: e.target.value })
-              }
-            />
-          </div>
-          <div className="flex flex-col md:w-1/2">
-            <label htmlFor="nomeBusca" className={labelStyle}>
-              Nome
-            </label>
-            <input
-              id="nomeBusca"
-              placeholder="Nome do colaborador"
-              type={"text"}
-              className={inputStyle}
-              value={inputSearch.nome}
-              onChange={(e) =>
-                setInputSearch({ ...inputSearch, nome: e.target.value })
-              }
-            />
-          </div>
-          <div className="flex ">
-            <Button className="mt-2 mr-2" onClick={buscarColaborador}>
-              <MagnifyingGlass size={20} className="mx-2" /> Buscar
-            </Button>
-            <Button className="mt-2" onClick={limparColaboradores}>
-              <Broom size={20} className="mx-2" /> Limpar
-            </Button>
-          </div>
-        </div>
-        <div className="flex justify-end w-full md:max-w-xs">
-          <Button
-            className="mt-2"
-            onClick={() => {
-              setIsModalOpened(true);
-              setModalType("NOVO_COLABORADOR");
-            }}
-          >
-            <PlusCircle size={20} className="mx-2" /> Novo colaborador
-          </Button>
-        </div>
-      </div>
-      <Modal
-        show={isAssocOrDesassocModalOpened.isOpened}
-        size="sm"
-        onClose={closeAndCleanModal}
-        popup
-      >
-        <Modal.Header />
-        <Modal.Body>
-          <div className="text-center">
-            <Warning
-              size={32}
-              className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200"
-            />
-            <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-              Tem certeza que deseja{" "}
-              {isAssocOrDesassocModalOpened.type === "ATIVOS"
-                ? "desassociar"
-                : "associar"}{" "}
-              o(a) colaborador(a) {getValues("nome")} ?
-            </h3>
-            <div className="flex justify-center gap-4">
-              <Button
-                color={
-                  isAssocOrDesassocModalOpened.type === "ATIVOS"
-                    ? "failure"
-                    : "success"
+    <>
+      <ToastContainer />
+      <MainLayout pageTitle="Colaboradores">
+        <div className="flex justify-between md:items-end py-4 flex-col md:flex-row">
+          <div className="flex gap-4 w-full md:max-w-3xl flex-col md:flex-row md:items-end">
+            <div className="flex flex-col md:w-1/2">
+              <label htmlFor="cpfBusca" className={labelStyle}>
+                CPF
+              </label>
+              <MaskedInput
+                id="cpfBusca"
+                mask={"999.999.999-99"}
+                placeholder="000.000.000-00"
+                alwaysShowMask={false}
+                type={"text"}
+                className={inputStyle}
+                value={inputSearch.cpf}
+                onChange={(e) =>
+                  setInputSearch({ ...inputSearch, cpf: e.target.value })
                 }
-                onClick={() => {
-                  closeAndCleanModal();
-                  isAssocOrDesassocModalOpened.type === "ATIVOS"
-                    ? alert("CHAMAR API DESASSOCIAR COLABORADOR")
-                    : alert("CHAMAR API ASSOCIAR COLABORADOR");
-                }}
-              >
-                Sim, eu tenho
+              />
+            </div>
+            <div className="flex flex-col md:w-1/2">
+              <label htmlFor="nomeBusca" className={labelStyle}>
+                Nome
+              </label>
+              <input
+                id="nomeBusca"
+                placeholder="Nome do colaborador"
+                type={"text"}
+                className={inputStyle}
+                value={inputSearch.nome}
+                onChange={(e) =>
+                  setInputSearch({ ...inputSearch, nome: e.target.value })
+                }
+              />
+            </div>
+            <div className="flex ">
+              <Button className="mt-2 mr-2" onClick={buscarColaborador}>
+                <MagnifyingGlass size={20} className="mx-2" /> Buscar
               </Button>
-              <Button color="gray" onClick={closeAndCleanModal}>
-                Não, cancelar
+              <Button className="mt-2" onClick={limparColaboradores}>
+                <Broom size={20} className="mx-2" /> Limpar
               </Button>
             </div>
           </div>
-        </Modal.Body>
-      </Modal>
-      <Modal show={isModalOpened} onClose={closeAndCleanModal} size="5xl">
-        <Modal.Header>
-          {modalType === "NOVO_COLABORADOR"
-            ? "Novo colaborador"
-            : "Editar colaborador"}
-        </Modal.Header>
-        <Modal.Body>
-          <div className="space-y-6">
-            {modalType === "NOVO_COLABORADOR" && (
-              <>
-                <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-                  Caso seu colaborador não possua nenhum registro na plataforma,
-                  basta inserir os dados abaixo para criar uma conta e
-                  associá-lo a sua empresa.
-                </p>
-
-                <hr />
-              </>
-            )}
-            <form id="hook-form" onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex justify-end w-full md:max-w-xs">
+            <Button
+              className="mt-2"
+              onClick={() => {
+                setIsModalOpened(true);
+                setModalType("NOVO_COLABORADOR");
+              }}
+            >
+              <PlusCircle size={20} className="mx-2" /> Novo colaborador
+            </Button>
+          </div>
+        </div>
+        <Modal
+          show={isAssocOrDesassocModalOpened.isOpened}
+          size="sm"
+          onClose={closeAndCleanModal}
+          popup
+        >
+          <Modal.Header />
+          <Modal.Body>
+            <div className="text-center">
+              <Warning
+                size={32}
+                className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200"
+              />
+              <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+                Tem certeza que deseja{" "}
+                {isAssocOrDesassocModalOpened.type === "ATIVOS"
+                  ? "desassociar"
+                  : "associar"}{" "}
+                o(a) colaborador(a) {getValues("nome")} ?
+              </h3>
+              <div className="flex justify-center gap-4">
+                <Button
+                  color={
+                    isAssocOrDesassocModalOpened.type === "ATIVOS"
+                      ? "failure"
+                      : "success"
+                  }
+                  onClick={() => {
+                    isAssocOrDesassocModalOpened.type === "ATIVOS"
+                      ? handleClickDesassociarOuAssociarColaborador(true)
+                      : handleClickDesassociarOuAssociarColaborador(false);
+                  }}
+                >
+                  Sim, eu tenho
+                </Button>
+                <Button color="gray" onClick={closeAndCleanModal}>
+                  Não, cancelar
+                </Button>
+              </div>
+            </div>
+          </Modal.Body>
+        </Modal>
+        <Modal show={isModalOpened} onClose={closeAndCleanModal} size="5xl">
+          <Modal.Header>
+            {modalType === "NOVO_COLABORADOR"
+              ? "Novo colaborador"
+              : "Editar colaborador"}
+          </Modal.Header>
+          <Modal.Body>
+            <div className="space-y-6">
               {modalType === "NOVO_COLABORADOR" && (
                 <>
-                  <div className="my-4">
-                    <div className="flex justify-between items-center">
-                      <div className="flex flex-col w-1/2">
-                        <label htmlFor="cpf" className={labelStyle}>
-                          CPF
-                        </label>
-                        <MaskedInput
-                          id="cpf"
-                          mask={"999.999.999-99"}
-                          placeholder="000.000.000-00"
-                          alwaysShowMask={false}
-                          type={"text"}
-                          {...register("cpf", {
-                            required: {
-                              value: true,
-                              message: "Campo obrigatório",
-                            },
-                            validate: (cpf) => isCpfValid(cpf),
-                          })}
-                          className={inputStyle}
-                        />
-                        {errors.cpf && (
-                          <span className="text-red-500 font-medium">
-                            {errors.cpf.message}
-                          </span>
-                        )}
-                        {errors.cpf?.type === "validate" && (
-                          <span className="text-red-500 font-medium">
-                            CPF inválido
-                          </span>
-                        )}
-                      </div>
-                      <Button>Consultar</Button>
-                    </div>
-                  </div>
+                  <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+                    Caso seu colaborador não possua nenhum registro na
+                    plataforma, basta inserir os dados abaixo para criar uma
+                    conta e associá-lo a sua empresa.
+                  </p>
 
                   <hr />
                 </>
               )}
+              <form id="hook-form" onSubmit={handleSubmit(onSubmit)}>
+                {modalType === "NOVO_COLABORADOR" && (
+                  <>
+                    <div className="my-4">
+                      <div className="flex justify-between items-center">
+                        <div className="flex flex-col w-1/2">
+                          <label htmlFor="cpf" className={labelStyle}>
+                            CPF
+                          </label>
+                          <MaskedInput
+                            id="cpf"
+                            mask={"999.999.999-99"}
+                            placeholder="000.000.000-00"
+                            alwaysShowMask={false}
+                            type={"text"}
+                            {...register("cpf", {
+                              required: {
+                                value: true,
+                                message: "Campo obrigatório",
+                              },
+                              validate: (cpf) => isCpfValid(cpf),
+                            })}
+                            className={inputStyle}
+                          />
+                          {errors.cpf && (
+                            <span className="text-red-500 font-medium">
+                              {errors.cpf.message}
+                            </span>
+                          )}
+                          {errors.cpf?.type === "validate" && (
+                            <span className="text-red-500 font-medium">
+                              CPF inválido
+                            </span>
+                          )}
+                        </div>
+                        <Button>Consultar</Button>
+                      </div>
+                    </div>
 
-              <div className="flex justify-between gap-8 my-4">
-                <div className="w-full">
-                  <label htmlFor="nome" className={labelStyle}>
-                    Nome
-                  </label>
-                  <input
-                    id="nome"
-                    placeholder="Seu nome"
-                    {...register("nome", {
-                      required: { value: true, message: "Campo obrigatório" },
-                    })}
-                    className={inputStyle}
-                  />
-                  {errors.nome && (
-                    <span className="text-red-500 font-medium">
-                      {errors.nome.message}
-                    </span>
-                  )}
+                    <hr />
+                  </>
+                )}
+
+                <div className="flex justify-between gap-8 my-4">
+                  <div className="w-full">
+                    <label htmlFor="nome" className={labelStyle}>
+                      Nome
+                    </label>
+                    <input
+                      id="nome"
+                      placeholder="Seu nome"
+                      {...register("nome", {
+                        required: { value: true, message: "Campo obrigatório" },
+                      })}
+                      className={inputStyle}
+                    />
+                    {errors.nome && (
+                      <span className="text-red-500 font-medium">
+                        {errors.nome.message}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="w-full">
+                    <label htmlFor="numeroMatricula" className={labelStyle}>
+                      Matrícula
+                    </label>
+                    <input
+                      placeholder="Matrícula colaborador"
+                      id="numeroMatricula"
+                      {...register("numeroMatricula", {
+                        required: { value: true, message: "Campo obrigatório" },
+                      })}
+                      className={inputStyle}
+                    />
+                    {errors.numeroMatricula && (
+                      <span className="text-red-500 font-medium">
+                        {errors.numeroMatricula.message}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                <div className="w-full">
-                  <label htmlFor="numeroMatricula" className={labelStyle}>
-                    Matrícula
-                  </label>
-                  <input
-                    placeholder="Matrícula colaborador"
-                    id="numeroMatricula"
-                    {...register("numeroMatricula", {
-                      required: { value: true, message: "Campo obrigatório" },
-                    })}
-                    className={inputStyle}
-                  />
-                  {errors.numeroMatricula && (
-                    <span className="text-red-500 font-medium">
-                      {errors.numeroMatricula.message}
-                    </span>
-                  )}
-                </div>
-              </div>
+                <div className="flex justify-between gap-8 mb-4">
+                  <div className="w-full">
+                    <label htmlFor="dataNascimento" className={labelStyle}>
+                      Data de Nascimento
+                    </label>
+                    <input
+                      placeholder="DD/MM/YYYY"
+                      id="dataNascimento"
+                      {...register("dataNascimento", {
+                        required: { value: true, message: "Campo obrigatório" },
+                        validate: (data) => isDateDD_MM_YYYY_Valid(data),
+                      })}
+                      value={date}
+                      onChange={(e) => handleDateChange(e)}
+                      className={inputStyle}
+                    />
+                    {errors.dataNascimento && (
+                      <span className="text-red-500 font-medium">
+                        {errors.dataNascimento.message}
+                      </span>
+                    )}
+                    {errors.dataNascimento?.type === "validate" && (
+                      <span className="text-red-500 font-medium">
+                        Data de nascimento inválida
+                      </span>
+                    )}
+                  </div>
 
-              <div className="flex justify-between gap-8 mb-4">
-                <div className="w-full">
-                  <label htmlFor="dataNascimento" className={labelStyle}>
-                    Data de Nascimento
-                  </label>
-                  <input
-                    placeholder="DD/MM/YYYY"
-                    id="dataNascimento"
-                    {...register("dataNascimento", {
-                      required: { value: true, message: "Campo obrigatório" },
-                      validate: (data) => isDateDD_MM_YYYY_Valid(data),
-                    })}
-                    value={date}
-                    onChange={(e) => handleDateChange(e)}
-                    className={inputStyle}
-                  />
-                  {errors.dataNascimento && (
-                    <span className="text-red-500 font-medium">
-                      {errors.dataNascimento.message}
-                    </span>
-                  )}
-                  {errors.dataNascimento?.type === "validate" && (
-                    <span className="text-red-500 font-medium">
-                      Data de nascimento inválida
-                    </span>
-                  )}
-                </div>
-
-                <div className="w-full">
-                  <label htmlFor="sexo" className={labelStyle}>
-                    Sexo
-                  </label>
-                  <select
-                    id="sexo"
-                    {...register("sexo", {
-                      required: { value: true, message: "Campo obrigatório" },
-                    })}
-                    className={inputStyle}
-                  >
-                    <option value={"M"}>Masculino</option>
-                    <option value={"F"}>Feminino</option>
-                    <option value={""}>Outro</option>
-                  </select>
-                  {errors.sexo && (
-                    <span className="text-red-500 font-medium">
-                      {errors.sexo.message}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex justify-between gap-8 mb-4">
-                <div className="w-full">
-                  <label htmlFor="celular" className={labelStyle}>
-                    Celular
-                  </label>
-                  <MaskedInput
-                    placeholder="(00) 00000-0000"
-                    mask="(99) 99999-9999"
-                    id="celular"
-                    {...register("celular", {
-                      required: { value: true, message: "Campo obrigatório" },
-                      validate: (celular) =>
-                        onlyNumbers(celular).length === 11 &&
-                        onlyNumbers(celular)[2] === "9",
-                    })}
-                    className={inputStyle}
-                  />
-                  {errors.celular && (
-                    <span className="text-red-500 font-medium">
-                      {errors.celular.message}
-                    </span>
-                  )}
-                  {errors.celular?.type === "validate" && (
-                    <span className="text-red-500 font-medium">
-                      Celular inválido
-                    </span>
-                  )}
+                  <div className="w-full">
+                    <label htmlFor="sexo" className={labelStyle}>
+                      Sexo
+                    </label>
+                    <select
+                      id="sexo"
+                      {...register("sexo", {
+                        required: { value: true, message: "Campo obrigatório" },
+                      })}
+                      className={inputStyle}
+                    >
+                      <option value={"M"}>Masculino</option>
+                      <option value={"F"}>Feminino</option>
+                      <option value={""}>Outro</option>
+                    </select>
+                    {errors.sexo && (
+                      <span className="text-red-500 font-medium">
+                        {errors.sexo.message}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                <div className="w-full">
-                  <label htmlFor="email" className={labelStyle}>
-                    E-mail
-                  </label>
-                  <input
-                    placeholder="Seu e-mail"
-                    id="email"
-                    type={"email"}
-                    {...register("email", {
-                      required: { value: true, message: "Campo obrigatório" },
-                      validate: (email) => isEmailValid(email),
-                    })}
-                    className={inputStyle}
-                  />
-                  {errors.email && (
-                    <span className="text-red-500 font-medium">
-                      {errors.email.message}
-                    </span>
-                  )}
-                  {errors.email?.type === "validate" && (
-                    <span className="text-red-500 font-medium">
-                      E-mail inválido
-                    </span>
-                  )}
-                </div>
-              </div>
+                <div className="flex justify-between gap-8 mb-4">
+                  <div className="w-full">
+                    <label htmlFor="celular" className={labelStyle}>
+                      Celular
+                    </label>
+                    <MaskedInput
+                      placeholder="(00) 00000-0000"
+                      mask="(99) 99999-9999"
+                      id="celular"
+                      {...register("celular", {
+                        required: { value: true, message: "Campo obrigatório" },
+                        validate: (celular) =>
+                          onlyNumbers(celular).length === 11 &&
+                          onlyNumbers(celular)[2] === "9",
+                      })}
+                      className={inputStyle}
+                    />
+                    {errors.celular && (
+                      <span className="text-red-500 font-medium">
+                        {errors.celular.message}
+                      </span>
+                    )}
+                    {errors.celular?.type === "validate" && (
+                      <span className="text-red-500 font-medium">
+                        Celular inválido
+                      </span>
+                    )}
+                  </div>
 
-              <div className="flex justify-between gap-8 mb-4">
-                <div className="w-full">
-                  <label htmlFor="valorDeUsoDiario" className={labelStyle}>
-                    Valor de uso diário
-                  </label>
-                  <input
-                    placeholder="R$ 0,00"
-                    id="valorDeUsoDiario"
-                    {...register("valorDeUsoDiario", {
-                      required: { value: true, message: "Campo obrigatório" },
-                    })}
-                    onChange={handleChangeValorUsoDiario}
-                    value={valorDeUsoDiario}
-                    className={inputStyle}
-                  />
-                  {errors.valorDeUsoDiario && (
-                    <span className="text-red-500 font-medium">
-                      {errors.valorDeUsoDiario.message}
-                    </span>
-                  )}
+                  <div className="w-full">
+                    <label htmlFor="email" className={labelStyle}>
+                      E-mail
+                    </label>
+                    <input
+                      placeholder="Seu e-mail"
+                      id="email"
+                      type={"email"}
+                      {...register("email", {
+                        required: { value: true, message: "Campo obrigatório" },
+                        validate: (email) => isEmailValid(email),
+                      })}
+                      className={inputStyle}
+                    />
+                    {errors.email && (
+                      <span className="text-red-500 font-medium">
+                        {errors.email.message}
+                      </span>
+                    )}
+                    {errors.email?.type === "validate" && (
+                      <span className="text-red-500 font-medium">
+                        E-mail inválido
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div className="w-full"></div>
-              </div>
-            </form>
-          </div>
-        </Modal.Body>
-        <Modal.Footer className="flex justify-end">
-          <Button type="submit" form="hook-form">
-            {modalType === "NOVO_COLABORADOR" ? "Criar" : "Editar"}
-          </Button>
-        </Modal.Footer>
-      </Modal>
-      <Tabs>
-        <Tabs.Item title="Ativos">
-          <ColaboratorTable
-            type="ATIVOS"
-            activeColaborators={activeColaborators}
-            inactiveColaborators={inactiveColaborators}
-            onClickEditar={(colaborador: ColaboratorType) => {
-              setModalType("EDITAR");
-              setIsModalOpened(true);
-              setColaboratorValues(colaborador);
-            }}
-            onClickActionButton={(colaborador) => {
-              setIsAssocOrDesassocModalOpened({
-                isOpened: true,
-                type: "ATIVOS",
-              });
-              setColaboratorValues(colaborador);
-            }}
-          />
-        </Tabs.Item>
-        <Tabs.Item title="Inativos">
-          <ColaboratorTable
-            type="INATIVOS"
-            activeColaborators={activeColaborators}
-            inactiveColaborators={inactiveColaborators}
-            onClickEditar={(colaborador: ColaboratorType) => {
-              setModalType("EDITAR");
-              setIsModalOpened(true);
-              setColaboratorValues(colaborador);
-            }}
-            onClickActionButton={(colaborador) => {
-              setIsAssocOrDesassocModalOpened({
-                isOpened: true,
-                type: "INATIVOS",
-              });
-              setColaboratorValues(colaborador);
-            }}
-          />
-        </Tabs.Item>
-      </Tabs>
-    </MainLayout>
+
+                <div className="flex justify-between gap-8 mb-4">
+                  <div className="w-full">
+                    <label htmlFor="valorDeUsoDiario" className={labelStyle}>
+                      Valor de uso diário
+                    </label>
+                    <input
+                      placeholder="R$ 0,00"
+                      id="valorDeUsoDiario"
+                      {...register("valorDeUsoDiario", {
+                        required: { value: true, message: "Campo obrigatório" },
+                      })}
+                      onChange={handleChangeValorUsoDiario}
+                      value={valorDeUsoDiario}
+                      className={inputStyle}
+                    />
+                    {errors.valorDeUsoDiario && (
+                      <span className="text-red-500 font-medium">
+                        {errors.valorDeUsoDiario.message}
+                      </span>
+                    )}
+                  </div>
+                  <div className="w-full"></div>
+                </div>
+              </form>
+            </div>
+          </Modal.Body>
+          <Modal.Footer className="flex justify-end">
+            <Button type="submit" form="hook-form">
+              {modalType === "NOVO_COLABORADOR" ? "Criar" : "Editar"}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+        <Tabs>
+          <Tabs.Item title="Ativos">
+            <ColaboratorTable
+              type="ATIVOS"
+              activeColaborators={activeColaborators}
+              inactiveColaborators={inactiveColaborators}
+              onClickEditar={(colaborador: ColaboratorType) => {
+                setModalType("EDITAR");
+                setIsModalOpened(true);
+                setColaboratorValues(colaborador);
+              }}
+              onClickActionButton={(colaborador) => {
+                setIsAssocOrDesassocModalOpened({
+                  isOpened: true,
+                  type: "ATIVOS",
+                });
+                setColaboratorValues(colaborador);
+                console.log(">>>>>>>>>>", colaborador);
+              }}
+            />
+          </Tabs.Item>
+          <Tabs.Item title="Inativos">
+            <ColaboratorTable
+              type="INATIVOS"
+              activeColaborators={activeColaborators}
+              inactiveColaborators={inactiveColaborators}
+              onClickEditar={(colaborador: ColaboratorType) => {
+                setModalType("EDITAR");
+                setIsModalOpened(true);
+                setColaboratorValues(colaborador);
+              }}
+              onClickActionButton={(colaborador) => {
+                setIsAssocOrDesassocModalOpened({
+                  isOpened: true,
+                  type: "INATIVOS",
+                });
+                setColaboratorValues(colaborador);
+              }}
+            />
+          </Tabs.Item>
+        </Tabs>
+      </MainLayout>
+    </>
   );
 }

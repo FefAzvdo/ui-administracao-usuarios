@@ -227,31 +227,45 @@ export function isDateDD_MM_YYYY_Valid(input: string): boolean {
   return !!input?.match(reg) && isCurrentDateAfterGivenDate(input);
 }
 
-export function formatDateFromYYYY_MM_DD_to_MMToDD_MM_YYYY(
+export function formatDateFromYYYY_MM_DD_To_DD_MM_YYYY(
   data: string | undefined
 ): string {
   if (data === undefined) return "";
   try {
-    // Usa split para separar o tempo
     const firstPart = data.split("T")[0];
 
-    // Usa split para dividir a data em partes (ano, mês, dia)
     const partes = firstPart.split("-");
 
-    // Se a data não tiver as três partes esperadas, retorna vazio
     if (partes.length !== 3) {
       // throw new Error("Formato de data inválido");
       return "";
     }
 
-    // Reorganiza as partes para o formato desejado (dia, mês, ano)
     const dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
 
     return dataFormatada;
   } catch (error) {
     console.error("Erro ao formatar data:", error);
-    return ""; // Retorna uma string vazia em caso de erro
+    return "";
   }
+}
+
+export function formatDateFromDD_MM_YYYY_To_YYYY_MM_DD(data: string): string {
+  const partes: string[] = data.split("/");
+
+  if (partes.length !== 3) {
+    return "";
+  }
+
+  const dataObj: Date = new Date(
+    parseInt(partes[2], 10),
+    parseInt(partes[1], 10) - 1,
+    parseInt(partes[0], 10)
+  );
+
+  const dataFormatada: string = dataObj.toISOString().slice(0, 10);
+
+  return dataFormatada;
 }
 
 export function setMaskNumeroCelular(numero: string): string {

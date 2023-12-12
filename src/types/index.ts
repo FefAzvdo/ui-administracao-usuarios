@@ -174,3 +174,16 @@ type Colaborador = {
   telefone: string;
   dataNascimento: string;
 };
+
+export type RequestEditarColaborador = {
+  nome: string;
+  matricula: string;
+  email: string;
+  sexo: string;
+  dataNascimento: string;
+  telefone: string;
+  valorUsoDiario: number;
+  numeroDocumento: string;
+  idClientePrincipal: number;
+  idClienteFavorecido: number;
+};
