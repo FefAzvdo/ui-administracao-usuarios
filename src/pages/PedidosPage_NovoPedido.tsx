@@ -69,8 +69,6 @@ export default function PedidosPage_NovoPedido() {
     isChecking: boolean,
     colaborador: ColaboratorType
   ) {
-    console.log("🚀 ~ colaborador:", colaborador);
-
     const tipoDePedido =
       colaborador.idServico !== undefined
         ? colaborador.tipoDePedido
@@ -81,8 +79,6 @@ export default function PedidosPage_NovoPedido() {
       valor: 22 * colaborador.valorUsoDiario,
       tipoDePedido: params.state === null ? "recarga-na-conta" : tipoDePedido,
     };
-
-    console.log("🚀 ~ editedColab:", editedColab);
 
     if (isChecking) {
       setSelectedColaboradores([...selectedColaboradores, editedColab]);

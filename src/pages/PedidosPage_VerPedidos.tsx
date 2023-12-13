@@ -185,7 +185,6 @@ export default function PedidosPage_VerPedido() {
                 labelClearButton="Limpar"
                 value={new Date(inputSearch.periodoAte).toLocaleDateString()}
                 onSelectedDateChanged={(date) => {
-                  console.log("🚀 ~ date:", date);
                   setInputSearch({
                     ...inputSearch,
                     periodoAte: date,
