@@ -42,7 +42,10 @@ export default function PedidosPage_VerPedido() {
 
   const codigoEmpresa = dadosEmpresa.codigo;
 
-  function fetchDataTodosOsPedidos() {
+  function fetchDataTodosOsPedidos(isOnUseEffect: boolean) {
+    const umAnoAtras = new Date();
+    umAnoAtras.setFullYear(umAnoAtras.getFullYear() - 1);
+
     setIsLoadingPedidos(true);
 
     const body = {
@@ -51,10 +54,13 @@ export default function PedidosPage_VerPedido() {
       numeroDocumento: "",
       numeroPedido: inputSearch.numeroPedido,
       periodo: {
-        de:
-          formatDateFromDD_MM_YYYY_To_YYYY_MM_DD(
-            inputSearch.periodoDe.toLocaleDateString()
-          ) + "T00:00:00",
+        de: isOnUseEffect
+          ? formatDateFromDD_MM_YYYY_To_YYYY_MM_DD(
+              umAnoAtras.toLocaleDateString()
+            ) + "T00:00:00"
+          : formatDateFromDD_MM_YYYY_To_YYYY_MM_DD(
+              inputSearch.periodoDe.toLocaleDateString()
+            ) + "T00:00:00",
         ate:
           formatDateFromDD_MM_YYYY_To_YYYY_MM_DD(
             inputSearch.periodoAte.toLocaleDateString()
@@ -75,7 +81,7 @@ export default function PedidosPage_VerPedido() {
   }
 
   useEffect(() => {
-    fetchDataTodosOsPedidos();
+    fetchDataTodosOsPedidos(true);
   }, []);
 
   function handleClickEditarPedido(pedidoSelecionado: PedidoType) {
@@ -179,7 +185,10 @@ export default function PedidosPage_VerPedido() {
                 }}
               />
             </div>
-            <Button className="mt-2" onClick={fetchDataTodosOsPedidos}>
+            <Button
+              className="mt-2"
+              onClick={() => fetchDataTodosOsPedidos(false)}
+            >
               <MagnifyingGlass size={20} className="mx-2" /> Buscar
             </Button>
           </div>

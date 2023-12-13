@@ -156,6 +156,7 @@ export default function ColaboradoresPage() {
     setValue("cpf", colaborador.numeroDocumento);
     setValue("nome", colaborador.nome);
     setValue("numeroMatricula", colaborador.matricula);
+    setDate(formatDateFromYYYY_MM_DD_To_DD_MM_YYYY(colaborador.dataNascimento));
     setValue(
       "dataNascimento",
       formatDateFromYYYY_MM_DD_To_DD_MM_YYYY(colaborador.dataNascimento)
@@ -163,6 +164,7 @@ export default function ColaboradoresPage() {
     setValue("sexo", colaborador.sexo);
     setValue("celular", setMaskNumeroCelular(colaborador.telefone));
     setValue("email", colaborador.email);
+    setValorDeUsoDiario(formatCurrencyToBRL(colaborador.valorUsoDiario));
     setValue(
       "valorDeUsoDiario",
       formatCurrencyToBRL(colaborador.valorUsoDiario)
@@ -178,10 +180,12 @@ export default function ColaboradoresPage() {
     setValue("nome", "");
     setValue("numeroMatricula", "");
     setValue("dataNascimento", "");
+    setDate("");
     setValue("sexo", "M");
     setValue("celular", "");
     setValue("email", "");
     setValue("valorDeUsoDiario", "");
+    setValorDeUsoDiario("");
     setValue("idClienteFavorecido", 0);
   };
 
@@ -537,6 +541,8 @@ export default function ColaboradoresPage() {
                       {...register("dataNascimento", {
                         required: { value: true, message: "Campo obrigatório" },
                         validate: (data) => isDateDD_MM_YYYY_Valid(data),
+                        // value: date,
+                        // onChange: (e) => handleDateChange(e),
                       })}
                       value={date}
                       onChange={(e) => handleDateChange(e)}
@@ -643,6 +649,8 @@ export default function ColaboradoresPage() {
                       id="valorDeUsoDiario"
                       {...register("valorDeUsoDiario", {
                         required: { value: true, message: "Campo obrigatório" },
+                        // value: valorDeUsoDiario,
+                        // onChange: handleChangeValorUsoDiario,
                       })}
                       onChange={handleChangeValorUsoDiario}
                       value={valorDeUsoDiario}
