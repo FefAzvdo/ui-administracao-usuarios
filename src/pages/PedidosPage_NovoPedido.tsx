@@ -33,7 +33,6 @@ export default function PedidosPage_NovoPedido() {
       .get(`/cliente/${codigoEmpresa}/favorecidos?page=1&size=500&idProduto=2`)
       .then((res) => {
         setAllColaboradores(res.data);
-        console.log(res.data);
       })
       .catch((err) => console.log(err))
       .finally(() => setIsLoading(false));
@@ -43,8 +42,16 @@ export default function PedidosPage_NovoPedido() {
     if (params.state !== null) {
       const itensPedidoModified =
         params.state.pedidoSelecionado.itensPedido.map(
-          (colab: { documento: string }) => {
-            return { ...colab, numeroDocumento: colab.documento };
+          (colab: ColaboratorType) => {
+            return {
+              ...colab,
+              numeroDocumento: colab.documento,
+              valor: colab.valorUsoDiario * 22,
+              tipoDePedido:
+                colab.idServico === 5
+                  ? "cartao-com-recarga"
+                  : "recarga-na-conta",
+            };
           }
         );
 
@@ -62,14 +69,20 @@ export default function PedidosPage_NovoPedido() {
     isChecking: boolean,
     colaborador: ColaboratorType
   ) {
+    console.log("🚀 ~ colaborador:", colaborador);
+
+    const tipoDePedido =
+      colaborador.idServico !== undefined
+        ? colaborador.tipoDePedido
+        : "recarga-na-conta";
+
     const editedColab = {
       ...colaborador,
-      valor:
-        params.state !== null
-          ? colaborador.valor
-          : 22 * colaborador.valorUsoDiario,
-      tipoDePedido: "recarga-na-conta",
+      valor: 22 * colaborador.valorUsoDiario,
+      tipoDePedido: params.state === null ? "recarga-na-conta" : tipoDePedido,
     };
+
+    console.log("🚀 ~ editedColab:", editedColab);
 
     if (isChecking) {
       setSelectedColaboradores([...selectedColaboradores, editedColab]);
@@ -188,7 +201,6 @@ export default function PedidosPage_NovoPedido() {
                     ) !== undefined ? (
                       <div className="flex gap-4 flex-col">
                         <RadioButtonTipoPedido
-                          defaultChecked
                           colaborador={colaborador}
                           labelName="Recarga na Conta Jaé VT"
                           labelColor="text-green-500"
@@ -202,7 +214,6 @@ export default function PedidosPage_NovoPedido() {
                         />
                         {colaborador.solicitarPrimeiraVia && (
                           <RadioButtonTipoPedido
-                            defaultChecked={false}
                             colaborador={colaborador}
                             labelName="Recarga + Cartão"
                             labelColor="text-blue-500"
@@ -227,9 +238,7 @@ export default function PedidosPage_NovoPedido() {
                     ) !== undefined ? (
                       <CurrencyInput
                         valorDeUsoDiario={formatCurrencyToBRL(
-                          params.state !== null
-                            ? colaborador.valor
-                            : colaborador.valorUsoDiario * 22
+                          colaborador.valorUsoDiario * 22
                         )}
                         onChange={(valorInput) => {
                           const newSelectedColabs = selectedColaboradores.map(

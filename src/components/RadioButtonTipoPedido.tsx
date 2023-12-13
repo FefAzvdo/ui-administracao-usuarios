@@ -7,7 +7,6 @@ type RadioButtonTipoPedido = {
   labelColor: string;
   radioId: string;
   radioValue: string;
-  defaultChecked: boolean;
   colaborador: ColaboratorType;
   selectedColaboradores: ColaboratorType[];
   onChange: (colabs: ColaboratorType[]) => void;
@@ -19,11 +18,15 @@ export const RadioButtonTipoPedido = ({
   labelColor,
   radioId,
   radioValue,
-  defaultChecked,
   colaborador,
   selectedColaboradores,
   onChange,
 }: RadioButtonTipoPedido) => {
+  const defaultChecked =
+    selectedColaboradores.find(
+      (selec) => selec.numeroDocumento === colaborador.numeroDocumento
+    )?.tipoDePedido === radioId;
+
   return (
     <div className="flex items-center gap-2">
       <Radio

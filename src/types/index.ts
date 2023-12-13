@@ -35,6 +35,7 @@ export type ColaboratorType = {
   dataNascimento: string;
   telefone: string;
   numeroDocumento: string;
+  documento: string;
   solicitarSegundaVia: boolean;
   solicitarPrimeiraVia: boolean;
   pedidoCartao: boolean;
@@ -47,6 +48,8 @@ export type ColaboratorType = {
   tipoDePedido: string;
   valorDaRecarga: number | string; //deletar
   valor: number | string;
+  idServico: number;
+  servico: string;
 };
 
 export type PedidoType = {
