@@ -81,6 +81,14 @@ export default function PedidosPage_VerPedido() {
   }
 
   useEffect(() => {
+    const umAnoAtras = new Date();
+    umAnoAtras.setFullYear(umAnoAtras.getFullYear() - 1);
+
+    setInputSearch({
+      ...inputSearch,
+      periodoDe: umAnoAtras,
+    });
+
     fetchDataTodosOsPedidos(true);
   }, []);
 
