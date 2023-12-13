@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import MainLayout from "../components/MainLayout";
-import { Button, Checkbox, Table } from "flowbite-react";
-import { mockColaboradores } from "./mock";
+import { Button, Checkbox, Spinner, Table } from "flowbite-react";
 import {
   formatCurrencyBrlToFloat,
   formatarCPF,
@@ -11,13 +10,34 @@ import { ColaboratorType } from "../types";
 import { RadioButtonTipoPedido } from "../components/RadioButtonTipoPedido";
 import { CurrencyInput } from "../components/CurrencyInput";
 import { useLocation, useNavigate } from "react-router-dom";
+import { api } from "../api";
+import { dadosEmpresa } from "../storage";
 
 export default function PedidosPage_NovoPedido() {
   const [selectedColaboradores, setSelectedColaboradores] = useState<
     ColaboratorType[]
   >([]);
+  const [allColaboradores, setAllColaboradores] = useState<ColaboratorType[]>(
+    []
+  );
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const params = useLocation();
+
+  const codigoEmpresa = dadosEmpresa.codigo;
+
+  function fetchDataColaboradores() {
+    setIsLoading(true);
+
+    api
+      .get(`/cliente/${codigoEmpresa}/favorecidos?page=1&size=500&idProduto=2`)
+      .then((res) => {
+        setAllColaboradores(res.data);
+        console.log(res.data);
+      })
+      .catch((err) => console.log(err))
+      .finally(() => setIsLoading(false));
+  }
 
   useEffect(() => {
     if (params.state !== null) {
@@ -34,6 +54,8 @@ export default function PedidosPage_NovoPedido() {
 
       setSelectedColaboradores(itensPedidoModified);
     }
+
+    fetchDataColaboradores();
   }, []);
 
   function handleChangeCheckbox(
@@ -113,122 +135,127 @@ export default function PedidosPage_NovoPedido() {
         </Button>
       </div>
       <div className="overflow-x-auto">
-        <Table hoverable>
-          <Table.Head>
-            <Table.HeadCell className="text-center">
-              Selecionar colaborador
-            </Table.HeadCell>
-            <Table.HeadCell>CPF</Table.HeadCell>
-            <Table.HeadCell>Nome</Table.HeadCell>
-            <Table.HeadCell className="text-center">
-              Já possui cartão
-            </Table.HeadCell>
-            <Table.HeadCell>Tipo de pedido</Table.HeadCell>
-            <Table.HeadCell>Valor de uso mensal (22 dias)</Table.HeadCell>
-          </Table.Head>
-          <Table.Body className="divide-y">
-            {mockColaboradores.map((colaborador) => (
-              <Table.Row
-                className="bg-white dark:border-gray-700 dark:bg-gray-800 hover:bg-slate-100"
-                key={colaborador.numeroDocumento}
-              >
-                <Table.Cell className="w-10 text-center ">
-                  <Checkbox
-                    checked={
-                      selectedColaboradores.find(
-                        (colab) =>
-                          colab.numeroDocumento === colaborador.numeroDocumento
-                      ) !== undefined
-                    }
-                    className="cursor-pointer"
-                    onChange={(e) => {
-                      //@ts-expect-error mock
-                      handleChangeCheckbox(e.target.checked, colaborador);
-                    }}
-                  />
-                </Table.Cell>
-                <Table.Cell>
-                  {formatarCPF(colaborador.numeroDocumento)}
-                </Table.Cell>
-                <Table.Cell>{colaborador.nome}</Table.Cell>
-                <Table.Cell className="text-center w-10">
-                  {colaborador.solicitarPrimeiraVia ? "Não" : "Sim"}
-                </Table.Cell>
-                <Table.Cell>
-                  {selectedColaboradores.find(
-                    (colab) =>
-                      colab.numeroDocumento === colaborador.numeroDocumento
-                  ) !== undefined ? (
-                    <div className="flex gap-4 flex-col">
-                      <RadioButtonTipoPedido
-                        defaultChecked
-                        //@ts-expect-error mock
-                        colaborador={colaborador}
-                        labelName="Recarga na Conta Jaé VT"
-                        labelColor="text-green-500"
-                        labelHtmlFor="recarga-na-conta"
-                        radioId="recarga-na-conta"
-                        radioValue="recarga-na-conta"
-                        onChange={(colaboradores) =>
-                          setSelectedColaboradores(colaboradores)
-                        }
-                        selectedColaboradores={selectedColaboradores}
-                      />
-                      {colaborador.solicitarPrimeiraVia && (
+        {isLoading ? (
+          <div className="flex items-center justify-center h-72">
+            <Spinner />
+          </div>
+        ) : (
+          <Table hoverable>
+            <Table.Head>
+              <Table.HeadCell className="text-center">
+                Selecionar colaborador
+              </Table.HeadCell>
+              <Table.HeadCell>CPF</Table.HeadCell>
+              <Table.HeadCell>Nome</Table.HeadCell>
+              <Table.HeadCell className="text-center">
+                Já possui cartão
+              </Table.HeadCell>
+              <Table.HeadCell>Tipo de pedido</Table.HeadCell>
+              <Table.HeadCell>Valor de uso mensal (22 dias)</Table.HeadCell>
+            </Table.Head>
+            <Table.Body className="divide-y">
+              {allColaboradores.map((colaborador) => (
+                <Table.Row
+                  className="bg-white dark:border-gray-700 dark:bg-gray-800 hover:bg-slate-100"
+                  key={colaborador.numeroDocumento}
+                >
+                  <Table.Cell className="w-10 text-center ">
+                    <Checkbox
+                      checked={
+                        selectedColaboradores.find(
+                          (colab) =>
+                            colab.numeroDocumento ===
+                            colaborador.numeroDocumento
+                        ) !== undefined
+                      }
+                      className="cursor-pointer"
+                      onChange={(e) => {
+                        handleChangeCheckbox(e.target.checked, colaborador);
+                      }}
+                    />
+                  </Table.Cell>
+                  <Table.Cell>
+                    {formatarCPF(colaborador.numeroDocumento)}
+                  </Table.Cell>
+                  <Table.Cell>{colaborador.nome}</Table.Cell>
+                  <Table.Cell className="text-center w-10">
+                    {colaborador.solicitarPrimeiraVia ? "Não" : "Sim"}
+                  </Table.Cell>
+                  <Table.Cell>
+                    {selectedColaboradores.find(
+                      (colab) =>
+                        colab.numeroDocumento === colaborador.numeroDocumento
+                    ) !== undefined ? (
+                      <div className="flex gap-4 flex-col">
                         <RadioButtonTipoPedido
-                          defaultChecked={false}
+                          defaultChecked
                           colaborador={colaborador}
-                          labelName="Recarga + Cartão"
-                          labelColor="text-blue-500"
-                          labelHtmlFor="cartao-com-recarga"
-                          radioId="cartao-com-recarga"
-                          radioValue="cartao-com-recarga"
+                          labelName="Recarga na Conta Jaé VT"
+                          labelColor="text-green-500"
+                          labelHtmlFor="recarga-na-conta"
+                          radioId="recarga-na-conta"
+                          radioValue="recarga-na-conta"
                           onChange={(colaboradores) =>
                             setSelectedColaboradores(colaboradores)
                           }
                           selectedColaboradores={selectedColaboradores}
                         />
-                      )}
-                    </div>
-                  ) : (
-                    "---"
-                  )}
-                </Table.Cell>
-                <Table.Cell>
-                  {selectedColaboradores.find(
-                    (colab) =>
-                      colab.numeroDocumento === colaborador.numeroDocumento
-                  ) !== undefined ? (
-                    <CurrencyInput
-                      valorDeUsoDiario={formatCurrencyToBRL(
-                        params.state !== null
-                          ? colaborador.valor
-                          : colaborador.valorUsoDiario * 22
-                      )}
-                      onChange={(valorInput) => {
-                        const newSelectedColabs = selectedColaboradores.map(
-                          (colabs) => {
-                            return {
-                              ...colabs,
-                              valor:
-                                colaborador.numeroDocumento ===
-                                colabs.numeroDocumento
-                                  ? formatCurrencyBrlToFloat(valorInput)
-                                  : colabs.valor,
-                            };
-                          }
-                        );
-                        setSelectedColaboradores(newSelectedColabs);
-                      }}
-                    />
-                  ) : (
-                    "---"
-                  )}
-                </Table.Cell>
-              </Table.Row>
-            ))}
-          </Table.Body>
-        </Table>
+                        {colaborador.solicitarPrimeiraVia && (
+                          <RadioButtonTipoPedido
+                            defaultChecked={false}
+                            colaborador={colaborador}
+                            labelName="Recarga + Cartão"
+                            labelColor="text-blue-500"
+                            labelHtmlFor="cartao-com-recarga"
+                            radioId="cartao-com-recarga"
+                            radioValue="cartao-com-recarga"
+                            onChange={(colaboradores) =>
+                              setSelectedColaboradores(colaboradores)
+                            }
+                            selectedColaboradores={selectedColaboradores}
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      "---"
+                    )}
+                  </Table.Cell>
+                  <Table.Cell>
+                    {selectedColaboradores.find(
+                      (colab) =>
+                        colab.numeroDocumento === colaborador.numeroDocumento
+                    ) !== undefined ? (
+                      <CurrencyInput
+                        valorDeUsoDiario={formatCurrencyToBRL(
+                          params.state !== null
+                            ? colaborador.valor
+                            : colaborador.valorUsoDiario * 22
+                        )}
+                        onChange={(valorInput) => {
+                          const newSelectedColabs = selectedColaboradores.map(
+                            (colabs) => {
+                              return {
+                                ...colabs,
+                                valor:
+                                  colaborador.numeroDocumento ===
+                                  colabs.numeroDocumento
+                                    ? formatCurrencyBrlToFloat(valorInput)
+                                    : colabs.valor,
+                              };
+                            }
+                          );
+                          setSelectedColaboradores(newSelectedColabs);
+                        }}
+                      />
+                    ) : (
+                      "---"
+                    )}
+                  </Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table>
+        )}
       </div>
     </MainLayout>
   );

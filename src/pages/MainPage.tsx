@@ -12,8 +12,8 @@ function MainPage() {
         senha: "#Trocar123",
         usuario: "21369699000131",
       })
-      .then((res) => {
-        const token = res.data.token;
+      .then((res_1) => {
+        const token = res_1.data.token;
         window.sessionStorage.setItem("TOKEN", token);
 
         const decodedToken = jwtDecode(token);
@@ -22,13 +22,13 @@ function MainPage() {
           JSON.stringify(decodedToken)
         );
 
-        api.get(`/cliente/conta-acesso/${decodedToken.jti}`).then((res) => {
+        api.get(`/cliente/conta-acesso/${decodedToken.jti}`).then((res_2) => {
           window.sessionStorage.setItem(
             "DADOS_EMPRESA",
-            JSON.stringify(res.data)
+            JSON.stringify(res_2.data)
           );
 
-          const isEmpresa = res.data.tiposDePerfis.find(
+          const isEmpresa = res_2.data.tiposDePerfis.find(
             (perfil: string) => (perfil === "EMPRESA") !== undefined
           );
 

@@ -69,7 +69,7 @@ export default function ColaboradoresPage() {
     setIsSearchLoading(true);
 
     api
-      .get(`/cliente/favorecido/ativos/${codigoEmpresa}`)
+      .get(`/cliente/${codigoEmpresa}/favorecidos?page=1&size=500&idProduto=2`)
       .then((res) => setActiveColaborators(res.data))
       .catch((err) => console.log(err))
       .finally(() => setIsSearchLoading(false));
@@ -215,7 +215,7 @@ export default function ColaboradoresPage() {
     setIsSearchLoading(true);
 
     api
-      .get(`/cliente/favorecido/ativos/${codigoEmpresa}`)
+      .get(`/cliente/${codigoEmpresa}/favorecidos?page=1&size=500&idProduto=2`)
       .then((res) => setActiveColaborators(res.data))
       .catch((err) => console.log(err))
       .finally(() => setIsSearchLoading(false));
@@ -256,6 +256,7 @@ export default function ColaboradoresPage() {
       })
       .finally(() => {
         closeAndCleanModal();
+        fetchDataColaboradores();
       });
   };
 
@@ -289,6 +290,7 @@ export default function ColaboradoresPage() {
       })
       .finally(() => {
         closeAndCleanModal();
+        fetchDataColaboradores();
       });
   };
 
