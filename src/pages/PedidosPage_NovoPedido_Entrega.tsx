@@ -25,7 +25,10 @@ export default function PedidosPage_NovoPedido_Entrega() {
 
   useEffect(() => {
     setSelectedColaboradores(params.state.selectedColaboradores);
-
+    console.log(
+      "🚀 ~ params.state.selectedColaboradores:",
+      params.state.selectedColaboradores
+    );
     //calcular taxa de entrega via api
     setValorTaxaDeEntrega(20);
   }, []);
@@ -45,7 +48,9 @@ export default function PedidosPage_NovoPedido_Entrega() {
     ) !== undefined;
 
   return (
-    <MainLayout pageTitle="Pedido 1452">
+    <MainLayout
+      pageTitle={`Entrega pedido ${params.state.pedido.numero ?? ""}`}
+    >
       <div className="flex justify-start items-center gap-8">
         <div className="text-2xl font-semibold">
           Valor dos itens:{" "}

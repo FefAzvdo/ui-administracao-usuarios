@@ -39,6 +39,8 @@ export default function PedidosPage_NovoPedido() {
   }
 
   useEffect(() => {
+    console.log("params.state", params.state);
+
     if (params.state !== null) {
       const itensPedidoModified =
         params.state.pedidoSelecionado.itensPedido.map(
@@ -94,10 +96,19 @@ export default function PedidosPage_NovoPedido() {
   }
 
   function handleClickNextStep() {
+    const pedidoSelecionado =
+      params.state !== null ? { ...params.state.pedidoSelecionado } : null;
+
+    const pedido = {
+      pedidoSelecionado,
+      itensPedido: selectedColaboradores,
+    };
+
     if (isWithoutErrors) {
       navigate("/novo-pedido/entrega", {
         state: {
           selectedColaboradores,
+          pedido,
         },
       });
     }
@@ -112,7 +123,11 @@ export default function PedidosPage_NovoPedido() {
 
   return (
     <MainLayout
-      pageTitle={params.state !== null ? "Editar pedido" : "Novo pedido"}
+      pageTitle={
+        params.state !== null
+          ? `Editar pedido ${params.state.pedidoSelecionado.numero}`
+          : "Novo pedido"
+      }
     >
       <div className="flex items-center justify-end">
         <p className="text-lg">
