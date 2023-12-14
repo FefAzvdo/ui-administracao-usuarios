@@ -190,3 +190,41 @@ export type RequestEditarColaborador = {
   idClientePrincipal: number;
   idClienteFavorecido: number;
 };
+
+export type RequestCadastroEmpresa = {
+  canalCadastro: string;
+  nome: string;
+  email: string;
+  idCliente: null;
+  codigo: null;
+  numeroDocumento: string;
+  telefone: string;
+  tipoDocumento: string;
+  senha: string;
+  confirmacaoSenha: string;
+  idTipoPerfilCliente: number;
+  nrSeqEndereco: null;
+  cep: string;
+  numero: string;
+  complemento: string;
+  logradouro: string;
+  bairro: string;
+  cidade: string;
+  uf: string;
+  tipoEndereco: TipoEnderecoRequestEmpresa;
+  tipoLogradouro: TipoLogradouroRequestEmpresa;
+  loading: boolean;
+  refeicao: boolean;
+  alimentacao: boolean;
+  combustivel: boolean;
+};
+
+type TipoEnderecoRequestEmpresa = {
+  codigo: number;
+  descricao: string;
+};
+
+type TipoLogradouroRequestEmpresa = {
+  id: number;
+  descricao: string;
+};
