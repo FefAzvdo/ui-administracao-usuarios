@@ -27,10 +27,10 @@ import {
   RequestNovoColaborador,
 } from "../types";
 import { inputStyle, labelStyle } from "../styles";
-import { api } from "../api";
+import { api, baseUrl } from "../api";
 import { ColaboratorTable } from "../components/ColaboratorTable";
-import { dadosEmpresa } from "../storage";
 import { ToastContainer, toast } from "react-toastify";
+import axios from "axios";
 type Inputs = {
   cpf: string;
   nome: string;
@@ -63,19 +63,30 @@ export default function ColaboradoresPage() {
   >([]);
   const [isSearchLoading, setIsSearchLoading] = useState(false);
 
-  const codigoEmpresa = dadosEmpresa.codigo;
+  const codigoEmpresa = JSON.parse(
+    window.sessionStorage.getItem("DADOS_EMPRESA") ?? "{}"
+  ).codigo;
+
+  const token = window.sessionStorage.getItem("TOKEN");
 
   const fetchDataColaboradores = () => {
+    console.log("🚀 ~ codigoEmpresa:", codigoEmpresa);
     setIsSearchLoading(true);
 
-    api
-      .get(`/cliente/${codigoEmpresa}/favorecidos?page=1&size=500&idProduto=2`)
+    axios
+      .get(
+        baseUrl() +
+          `/cliente/${codigoEmpresa}/favorecidos?page=1&size=500&idProduto=2`,
+        { headers: { Authorization: token } }
+      )
       .then((res) => setActiveColaborators(res.data))
       .catch((err) => console.log(err))
       .finally(() => setIsSearchLoading(false));
 
-    api
-      .get(`/cliente/favorecido/inativos/${codigoEmpresa}`)
+    axios
+      .get(baseUrl() + `/cliente/favorecido/inativos/${codigoEmpresa}`, {
+        headers: { Authorization: token },
+      })
       .then((res) => setInactiveColaborators(res.data))
       .catch((err) => console.log(err))
       .finally(() => setIsSearchLoading(false));
@@ -83,6 +94,8 @@ export default function ColaboradoresPage() {
 
   useEffect(() => {
     fetchDataColaboradores();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const {

@@ -1,7 +1,8 @@
 import banner from "../assets/mulher-rh.jpg";
 import { Link, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import { api } from "../api";
+import { api, baseUrl } from "../api";
+import axios from "axios";
 
 function MainPage() {
   const navigate = useNavigate();
@@ -17,25 +18,31 @@ function MainPage() {
         window.sessionStorage.setItem("TOKEN", token);
 
         const decodedToken = jwtDecode(token);
+
         window.sessionStorage.setItem(
           "DECODED_TOKEN",
           JSON.stringify(decodedToken)
         );
 
-        api.get(`/cliente/conta-acesso/${decodedToken.jti}`).then((res_2) => {
-          window.sessionStorage.setItem(
-            "DADOS_EMPRESA",
-            JSON.stringify(res_2.data)
-          );
+        console.log("🚀 ~ token:", token);
+        axios
+          .get(baseUrl() + `/cliente/conta-acesso/${decodedToken.jti}`, {
+            headers: { Authorization: token },
+          })
+          .then((res_2) => {
+            window.sessionStorage.setItem(
+              "DADOS_EMPRESA",
+              JSON.stringify(res_2.data)
+            );
 
-          const isEmpresa = res_2.data.tiposDePerfis.find(
-            (perfil: string) => (perfil === "EMPRESA") !== undefined
-          );
+            const isEmpresa = res_2.data.tiposDePerfis.find(
+              (perfil: string) => (perfil === "EMPRESA") !== undefined
+            );
 
-          if (isEmpresa) {
-            navigate("/colaboradores");
-          }
-        });
+            if (isEmpresa) {
+              navigate("/colaboradores");
+            }
+          });
       })
       .catch((err) => {
         console.log("🚀 ~ err:", err);
