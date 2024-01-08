@@ -7,7 +7,7 @@ import {
   formatCurrencyBrlToFloat,
   formatCurrencyToBRL,
 } from "../utils";
-import { Tabs } from "flowbite-react";
+import { Button, Tabs } from "flowbite-react";
 import { mockLojas, mockUsuario } from "./mock";
 import { House, Storefront } from "@phosphor-icons/react";
 import EnderecoContainer from "../components/EnderecoContainer";
@@ -53,28 +53,33 @@ export default function PedidosPage_NovoPedido_Entrega() {
     <MainLayout
       pageTitle={`Entrega pedido ${params.state.pedido.numero ?? ""}`}
     >
-      <div className="flex justify-start items-center gap-8">
-        <div className="text-2xl font-semibold">
-          Valor dos itens:{" "}
-          <span className="text-green-400">{valorDosItens}</span>
+      <div className="flex justify-between">
+        <div className="flex justify-start items-center gap-8">
+          <div className="text-2xl font-semibold">
+            Valor dos itens:{" "}
+            <span className="text-green-400">{valorDosItens}</span>
+          </div>
+          <div className="text-2xl font-semibold">
+            Taxa de entrega:{" "}
+            <span className="text-green-400">
+              {formatCurrencyToBRL(
+                possuiTaxaDeEntrega && hasDeliveryItems ? valorTaxaDeEntrega : 0
+              )}
+            </span>
+          </div>
+          <div className="text-2xl font-semibold">
+            Valor total:{" "}
+            <span className="text-green-400">
+              {formatCurrencyToBRL(
+                possuiTaxaDeEntrega && hasDeliveryItems
+                  ? formatCurrencyBrlToFloat(valorDosItens) + valorTaxaDeEntrega
+                  : formatCurrencyBrlToFloat(valorDosItens)
+              )}
+            </span>
+          </div>
         </div>
-        <div className="text-2xl font-semibold">
-          Taxa de entrega:{" "}
-          <span className="text-green-400">
-            {formatCurrencyToBRL(
-              possuiTaxaDeEntrega && hasDeliveryItems ? valorTaxaDeEntrega : 0
-            )}
-          </span>
-        </div>
-        <div className="text-2xl font-semibold">
-          Valor total:{" "}
-          <span className="text-green-400">
-            {formatCurrencyToBRL(
-              possuiTaxaDeEntrega && hasDeliveryItems
-                ? formatCurrencyBrlToFloat(valorDosItens) + valorTaxaDeEntrega
-                : formatCurrencyBrlToFloat(valorDosItens)
-            )}
-          </span>
+        <div>
+          <Button>Finalizar pedido</Button>
         </div>
       </div>
       {hasDeliveryItems ? (

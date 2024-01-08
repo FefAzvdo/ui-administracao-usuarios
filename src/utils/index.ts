@@ -317,3 +317,16 @@ export function getCurrentStatusPedido(status: string | undefined):
   }
   return mockStatusPedido.find((stat) => stat.value === status);
 }
+
+export function getIdTipoItemPedido(tipo: string): number {
+  switch (tipo) {
+    case "recarga-na-conta":
+      return 5;
+      break;
+    case "cartao-com-recarga":
+      return 13;
+    default:
+      return 0;
+      break;
+  }
+}

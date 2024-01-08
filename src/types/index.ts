@@ -228,3 +228,35 @@ type TipoLogradouroRequestEmpresa = {
   id: number;
   descricao: string;
 };
+
+export type PedidoBody = {
+  comTaxaEntrega: boolean;
+  idCliente: number;
+  idTipoPerfilCliente: string;
+  itensPedido: ItensPedido[];
+  nrSeqEndereco: number;
+  numero?: number;
+  tipoPagamento: string[];
+  valorCalculadoPedido: number;
+  valorPedido: number;
+  valorRefeicao: number;
+  valorAlimentacao: number;
+  valorCombustivel: number;
+};
+
+export type ItensPedido = {
+  excluir: boolean;
+  idEmissorMidia?: number;
+  valorProduto: number;
+  idItem?: number;
+  idAplicacao: number;
+  idModeloProduto: number;
+  idMotivoCancelamento: number;
+  idTipoItemPedido: number;
+  idItemBeneficio: number;
+  valorCredito: number | string;
+  idTipoPerfilCliente: string;
+  idCliente: number;
+  numeroLogicoMidia: string;
+  idProduto: number;
+};

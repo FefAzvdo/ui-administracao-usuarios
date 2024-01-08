@@ -5,8 +5,9 @@ import {
   formatCurrencyBrlToFloat,
   formatarCPF,
   formatCurrencyToBRL,
+  getIdTipoItemPedido,
 } from "../utils";
-import { ColaboratorType } from "../types";
+import { ColaboratorType, ItensPedido, PedidoBody } from "../types";
 import { RadioButtonTipoPedido } from "../components/RadioButtonTipoPedido";
 import { CurrencyInput } from "../components/CurrencyInput";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -95,6 +96,44 @@ export default function PedidosPage_NovoPedido() {
     }
   }
 
+  function generatePedidoBody() {
+    const itensPedido: ItensPedido[] = selectedColaboradores.map((item) => {
+      return {
+        excluir: false,
+        idEmissorMidia: 0,
+        valorProduto: 0,
+        idItem: 0,
+        idAplicacao: 30,
+        idModeloProduto: 1,
+        idMotivoCancelamento: 0,
+        idCliente: item.idClienteFavorecido,
+        idItemBeneficio: 0,
+        idProduto: 2,
+        idTipoPerfilCliente: "USUARIO",
+        valorCredito: item.valor,
+        idTipoItemPedido: getIdTipoItemPedido(item.tipoDePedido),
+        numeroLogicoMidia: "",
+      };
+    });
+
+    const body: PedidoBody = {
+      comTaxaEntrega: false,
+      idCliente: codigoEmpresa,
+      idTipoPerfilCliente: "EMPRESA",
+      itensPedido,
+      nrSeqEndereco: 0,
+      numero: 0,
+      tipoPagamento: ["BOLETO"],
+      valorCalculadoPedido: 0,
+      valorPedido: 0,
+      valorRefeicao: 0,
+      valorAlimentacao: 0,
+      valorCombustivel: 0,
+    };
+
+    return body;
+  }
+
   function handleClickNextStep() {
     const pedidoSelecionado =
       params.state !== null ? { ...params.state.pedidoSelecionado } : null;
@@ -105,11 +144,13 @@ export default function PedidosPage_NovoPedido() {
     };
 
     if (isWithoutErrors) {
-      navigate("/novo-pedido/entrega", {
-        state: {
-          selectedColaboradores,
-          pedido,
-        },
+      api.post(`/pedido`, generatePedidoBody()).then(() => {
+        navigate("/novo-pedido/entrega", {
+          state: {
+            selectedColaboradores,
+            pedido,
+          },
+        });
       });
     }
   }
