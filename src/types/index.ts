@@ -260,3 +260,26 @@ export type ItensPedido = {
   numeroLogicoMidia: string;
   idProduto: number;
 };
+
+export type CadastroEnderecoRequest = {
+  nrSeqEndereco: number;
+  cep: string;
+  numero: number | string;
+  complemento: string;
+  logradouro: string;
+  bairro: string;
+  cidade: string;
+  uf: string;
+  tipoEndereco: TipoEndereco;
+  tipoLogradouro: TipoLogradouro;
+};
+
+type TipoEndereco = {
+  codigo: number;
+  descricao: string;
+};
+
+type TipoLogradouro = {
+  id: number;
+  descricao: string;
+};
