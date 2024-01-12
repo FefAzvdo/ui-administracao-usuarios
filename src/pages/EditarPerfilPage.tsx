@@ -11,10 +11,14 @@ import { inputStyle, labelStyle, sumbitButtonStyle } from "../styles";
 import { SubmitHandler, useForm } from "react-hook-form";
 import MaskedInput from "react-input-mask";
 import { useEffect, useRef, useState } from "react";
-import { CadastroEnderecoRequest, EnderecoType } from "../types";
+import {
+  CadastroEnderecoRequest,
+  DadosContaAcessoType,
+  EnderecoType,
+} from "../types";
 import axios from "axios";
 import EnderecoContainerMeuPerfil from "../components/EnderecoContainerMeuPerfil";
-import { dadosEmpresa, decodedToken, token } from "../storage";
+import { decodedToken, token } from "../storage";
 import { api, baseUrl } from "../api";
 import { ToastContainer, toast } from "react-toastify";
 
@@ -62,25 +66,9 @@ export default function EditarPerfilPage() {
 
   const tabsRef = useRef<TabsRef>(null);
 
-  const codigoEmpresa = dadosEmpresa.codigo;
-
   const onSubmitAlterarPerfil: SubmitHandler<InputsPerfil> = (data) => {
     console.log("🚀 ~ data:", data);
     alert("CHAMAR API ALTERAR DADOS EMPRESA");
-  };
-
-  const updateStorageDadosEmpresa = (callback: () => void) => {
-    axios
-      .get(baseUrl() + `/cliente/conta-acesso/${decodedToken.jti}`, {
-        headers: { Authorization: token },
-      })
-      .then((res_2) => {
-        window.sessionStorage.setItem(
-          "DADOS_EMPRESA",
-          JSON.stringify(res_2.data)
-        );
-        callback();
-      });
   };
 
   const onSubmitEndereco: SubmitHandler<InputsEndereco> = (data) => {
@@ -98,13 +86,13 @@ export default function EditarPerfilPage() {
     };
 
     api
-      .post(`/cliente/endereco/cliente/${codigoEmpresa}`, body)
+      .post(`/cliente/endereco/cliente/${dadosEmpresa?.codigo}`, body)
       .then(() => {
         toast.success("Endereço criado com sucesso", {
           position: toast.POSITION.TOP_RIGHT,
         });
-
-        updateStorageDadosEmpresa(() => tabsRef.current?.setActiveTab(2));
+        tabsRef.current?.setActiveTab(2);
+        fetchDadosEmpresa();
         cleanEnderecoValues();
       })
       .catch(() => {
@@ -121,14 +109,29 @@ export default function EditarPerfilPage() {
   };
 
   const [showEditAddressModal, setShowAddressModal] = useState(false);
-  const { nome, numeroDocumento, telefone, email, enderecos } = dadosEmpresa;
+  const [dadosEmpresa, setDadosEmpresa] = useState<DadosContaAcessoType>();
+
+  // const { nome, numeroDocumento, telefone, email, enderecos } = dadosEmpresa;
+
+  const fetchDadosEmpresa = () => {
+    axios
+      .get(baseUrl() + `/cliente/conta-acesso/${decodedToken.jti}`, {
+        headers: { Authorization: token },
+      })
+      .then((res) => {
+        const { nome, numeroDocumento, telefone, email } = res.data;
+
+        setValue("nome", nome);
+        setValue("cnpj", numeroDocumento);
+        setValue("telefoneParaContato", telefone);
+        setValue("email", email);
+
+        setDadosEmpresa(res.data);
+      });
+  };
 
   useEffect(() => {
-    setValue("nome", nome);
-    setValue("cnpj", numeroDocumento);
-    setValue("telefoneParaContato", telefone);
-    setValue("email", email);
-
+    fetchDadosEmpresa();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -182,7 +185,8 @@ export default function EditarPerfilPage() {
         toast.success("Endereço deletado com sucesso", {
           position: toast.POSITION.TOP_RIGHT,
         });
-        updateStorageDadosEmpresa(() => tabsRef.current?.setActiveTab(2));
+        tabsRef.current?.setActiveTab(2);
+        fetchDadosEmpresa();
       })
       .catch(() => {
         toast.error("Erro ao deletar endereço", {
@@ -470,14 +474,14 @@ export default function EditarPerfilPage() {
             icon={convertPhosphorIcon(<House size={25} />)}
           >
             <div className="flex justify-center flex-col items-center">
-              {enderecos.map((endereco: EnderecoType) => {
+              {dadosEmpresa?.enderecos.map((endereco: EnderecoType) => {
                 return (
                   <EnderecoContainerMeuPerfil
                     key={endereco.nrSeqEndereco}
                     endereco={endereco}
                     onClickEditar={() => handleClickEditarEndereco(endereco)}
                     onClickDeletar={() => handleClickDeletarEndereco(endereco)}
-                    hasDeleteItem={enderecos.length > 1}
+                    hasDeleteItem={dadosEmpresa.enderecos.length > 1}
                   />
                 );
               })}

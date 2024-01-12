@@ -283,3 +283,30 @@ type TipoLogradouro = {
   id: number;
   descricao: string;
 };
+
+export type DadosContaAcessoType = {
+  codigo: number;
+  idContaAcesso: number;
+  nome: string;
+  nomeSocial: string;
+  numeroDocumento: string;
+  numeroDocumentoAlternativo: string;
+  tipoDocumento: TipoDocumento;
+  tipoPessoa: string;
+  email: string;
+  telefone: string;
+  dataCadastro: string;
+  enderecos: EnderecoType[];
+  tiposDePerfis: string[];
+  clientePerfis: string[];
+  clientesFavorecidos: string[];
+  midias: string[];
+  midiasFavorecidos: string[];
+  razaoSocial: string;
+  nomeFantasia: string;
+  numeroInscricao: string;
+  contatos: string[];
+  emailAlternativo: string;
+  possuiBeneficioBeevale: boolean;
+  desabilitarBeevale: boolean;
+};
