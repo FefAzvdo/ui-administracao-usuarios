@@ -18,7 +18,6 @@ import {
 } from "../types";
 import axios from "axios";
 import EnderecoContainerMeuPerfil from "../components/EnderecoContainerMeuPerfil";
-import { decodedToken, token } from "../storage";
 import { api, baseUrl } from "../api";
 import { ToastContainer, toast } from "react-toastify";
 
@@ -40,6 +39,12 @@ type InputsEndereco = {
 };
 
 export default function EditarPerfilPage() {
+  const decodedToken = JSON.parse(
+    window.sessionStorage.getItem("DECODED_TOKEN") ?? "{}"
+  );
+
+  const token = window.sessionStorage.getItem("TOKEN");
+
   const {
     register,
     handleSubmit,
