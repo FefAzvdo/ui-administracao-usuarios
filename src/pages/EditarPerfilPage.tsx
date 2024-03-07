@@ -45,6 +45,10 @@ export default function EditarPerfilPage() {
 
   const token = window.sessionStorage.getItem("TOKEN");
 
+  const dadosEmpresaStorage = JSON.parse(
+    window.sessionStorage.getItem("DADOS_EMPRESA") ?? "{}"
+  );
+
   const {
     register,
     handleSubmit,
@@ -72,8 +76,29 @@ export default function EditarPerfilPage() {
   const tabsRef = useRef<TabsRef>(null);
 
   const onSubmitAlterarPerfil: SubmitHandler<InputsPerfil> = (data) => {
-    console.log("🚀 ~ data:", data);
-    alert("CHAMAR API ALTERAR DADOS EMPRESA");
+    const body = {
+      codigo: dadosEmpresaStorage.codigo,
+      idTipoPerfilCliente: 1,
+      tipoDocumento: "CNPJ",
+      idCliente: dadosEmpresaStorage.codigo,
+      email: data.email,
+      nome: data.nome,
+      numeroDocumento: data.cnpj,
+      telefone: data.telefoneParaContato,
+    };
+
+    api
+      .put(`/cliente/pessoa-juridica`, body)
+      .then(() => {
+        toast.success("Dados alterados com sucesso", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      })
+      .catch(() => {
+        toast.error("Erro ao alterar dados", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      });
   };
 
   const onSubmitEndereco: SubmitHandler<InputsEndereco> = (data) => {
